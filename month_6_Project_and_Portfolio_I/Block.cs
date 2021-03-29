@@ -37,16 +37,16 @@ namespace month_6_Project_and_Portfolio_I
 
         public bool GetCell(uint x, uint y) => this.cells[x, y];
 
-        private void SetCell(uint x, uint y, bool value)
+        public void SetCell(uint x, uint y, bool value)
         {
             this.cells[x, y] = value;
         }
 
-        public bool CellIs(uint x, uint y, bool value) => this.GetCell(x, y) == value;
+        public bool CellIs(uint x, uint y, bool value) => this.cells[x, y] == value;
 
         public void InvertCell(uint x, uint y)
         {
-            this.SetCell(x, y, !this.GetCell(x, y));
+            this.cells[x, y] = !this.cells[x, y];
         }
     }
 }
