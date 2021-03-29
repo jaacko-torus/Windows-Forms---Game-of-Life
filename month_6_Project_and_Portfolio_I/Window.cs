@@ -82,7 +82,7 @@ namespace month_6_Project_and_Portfolio_I
                     cell_size, cell_size
                 );
 
-                if (Map[(0, 0)].CellIs(x, y, true))
+                if (Map[(0, 0)].Is(x, y, true))
                 {
                     e.Graphics.FillRectangle(cellBrush, cellRect);
                 }
@@ -108,7 +108,7 @@ namespace month_6_Project_and_Portfolio_I
                 );
 
                 // Toggle the cell's state
-                Map[(0, 0)].InvertCell(cell_clicked.x, cell_clicked.y);
+                Map[(0, 0)].Toggle(cell_clicked.x, cell_clicked.y);
 
                 // Tell Windows you need to repaint
                 graphicsPanel1.Invalidate();
