@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Drawing;
 
 namespace month_6_Project_and_Portfolio_I
 {
@@ -10,15 +12,15 @@ namespace month_6_Project_and_Portfolio_I
     {
         public readonly (int x, int y) coord_id;
 
-        public readonly int size;
+        public readonly int block_size;
         public Cell[,] cells;
         
         public List<(int x, int y)> alive_list = new List<(int x, int y)>();
 
-        public Block(int x_position, int y_position, int size) {
+        public Block(int x_position, int y_position, int block_size) {
             this.coord_id = (x_position, y_position);
-            this.size = size;
-            this.cells = new Cell[size, size];
+            this.block_size = block_size;
+            this.cells = new Cell[block_size, block_size];
 
             this.ForEach((x, y) => this.cells[x, y] = new Cell(x, y, false));
         }
@@ -55,8 +57,8 @@ namespace month_6_Project_and_Portfolio_I
         public void Toggle((int x, int y) cell) { this.Toggle(cell.x, cell.y); }
 
         public bool IsOutsideCell((int x, int y) cell) => (
-            cell.x < 0 || this.size <= cell.x ||
-            cell.y < 0 || this.size <= cell.y
+            cell.x < 0 || this.block_size <= cell.x ||
+            cell.y < 0 || this.block_size <= cell.y
         );
 
         public delegate void MatrixScanAliveCellsCallback((int x, int y) cell);
@@ -73,6 +75,37 @@ namespace month_6_Project_and_Portfolio_I
                     }
                 }
             });
+        }
+
+        public void Draw(
+            PaintEventArgs e, Brush brush, Pen pen,
+            int cell_size, (int x, int y) offset
+        ) {
+            this.ForEach((x, y) => {
+                Rectangle cellRect = new Rectangle(
+                    x * cell_size + offset.x,
+                    y * cell_size + offset.y,
+                    cell_size, cell_size
+                );
+
+                // cell
+                this.Get(x, y).Draw(e, brush, cellRect);
+
+                // grid
+                e.Graphics.DrawRectangle(pen, cellRect);
+            });
+        }
+
+        public bool Within(int x, int y, int cell_size, (int x, int y) offset) {
+            int x_min = offset.x;
+            int y_min = offset.y;
+            int x_max = cell_size * this.block_size + offset.x;
+            int y_max = cell_size * this.block_size + offset.y;
+
+            return (
+                x_min < x && x < x_max &&
+                y_min < y && y < y_max
+            );
         }
 
         public Dictionary<(int x, int y), int> Next() {

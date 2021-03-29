@@ -358,7 +358,7 @@ namespace month_6_Project_and_Portfolio_I
             this.graphicsPanelMain.Name = "graphicsPanelMain";
             this.graphicsPanelMain.Size = new System.Drawing.Size(1184, 690);
             this.graphicsPanelMain.TabIndex = 3;
-            this.graphicsPanelMain.Paint += new System.Windows.Forms.PaintEventHandler(this.graphicsPanel1_Paint);
+            this.graphicsPanelMain.Paint += new System.Windows.Forms.PaintEventHandler(this.graphicsPanelMain_Paint);
             this.graphicsPanelMain.MouseClick += new System.Windows.Forms.MouseEventHandler(this.graphicsPanelMain_MouseClick);
             // 
             // Window

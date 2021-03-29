@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Drawing;
 
 namespace month_6_Project_and_Portfolio_I {
     class Cell {
@@ -25,5 +27,11 @@ namespace month_6_Project_and_Portfolio_I {
         public void Set(bool value) { this.state = value; }
         
         public void Toggle() => this.state = !this.state;
+
+        public void Draw(PaintEventArgs e, Brush brush, Rectangle rectangle) {
+            if (this.IsAlive) {
+                e.Graphics.FillRectangle(brush, rectangle);
+            }
+        }
     }
 }
