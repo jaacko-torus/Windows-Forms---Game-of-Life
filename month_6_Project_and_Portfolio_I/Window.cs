@@ -8,55 +8,41 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-// Pallette https://www.nordtheme.com/docs/colors-and-palettes
-
 namespace month_6_Project_and_Portfolio_I
 {
     public partial class Window : Form
     {
-        // The universe array
-        bool[,] universe = new bool[5, 5];
+        // Drawing colors, Pallette https://www.nordtheme.com/docs/colors-and-palettes
+        private readonly Color gridColor           = Color.FromArgb(0x3B, 0x42, 0x52); // #3B4252
+        private readonly Color gridNextToCellColor = Color.FromArgb(0xD0, 0x70, 0x7F); // #D0707F Using relative to cellColor
+        private readonly Color cellColor           = Color.FromArgb(0xBF, 0x61, 0x6A); // #BF616A
 
-        // Drawing colors
-        Color gridColor           = Color.FromArgb(0x3B, 0x42, 0x52); // #3B4252
-        Color gridNextToCellColor = Color.FromArgb(0xD0, 0x70, 0x7F); // #D0707F Using relative to cellColor
-        Color cellColor           = Color.FromArgb(0xBF, 0x61, 0x6A); // #BF616A
-
-        Dictionary<(int x, int y), Block> Map = new Dictionary<(int x, int y), Block>() {
+        private Dictionary<(int x, int y), Block> Map = new Dictionary<(int x, int y), Block>() {
             { (0,0), new Block(0, 0, 10) }
         };
 
-        // The Timer class
-        Timer timer = new Timer();
+        private readonly Timer timer = new Timer();
 
-        // Generation count
-        int generations = 0;
+        int generation = 0;
 
-        public Window()
-        {
-            InitializeComponent();
+        public Window() {
+            this.InitializeComponent();
 
             // Setup the timer
-            timer.Interval = 500;
-            timer.Tick += Timer_Tick;
+            this.timer.Interval = 500;
+            //timer.Tick += Timer_Tick;
+            this.timer.Tick += (object s, EventArgs e) => this.NextGeneration();
         }
 
         // Calculate the next generation of cells
-        private void NextGeneration()
-        {
+        private void NextGeneration() {
 
+            //this.Map
 
-            // Increment generation count
-            generations += 1;
+            this.generation += 1;
 
             // Update status strip generations
-            toolStripStatusLabelGenerations.Text = "Generations = " + generations.ToString();
-        }
-        
-        // The event called by the timer every Interval milliseconds.
-        private void Timer_Tick(object sender, EventArgs e)
-        {
-            NextGeneration();
+            this.toolStripStatusLabelGenerations.Text = $"Generation {this.generation}";
         }
 
         private int CellSize(GraphicsPanel panel, int size) => Math.Min(panel.ClientSize.Width / size, panel.ClientSize.Height / size);
@@ -66,24 +52,22 @@ namespace month_6_Project_and_Portfolio_I
             CalcSingleOffset(panel.ClientSize.Height, cell_size, amount)
         );
 
-        private void graphicsPanel1_Paint(object sender, PaintEventArgs e)
-        {
-            int cell_size = CellSize(graphicsPanel1, Map[(0, 0)].size);
+        private void graphicsPanel1_Paint(object sender, PaintEventArgs e) {
+            int cell_size = CellSize(this.graphicsPanelMain, this.Map[(0, 0)].size);
 
-            (int x, int y) offset = CalcOffset(graphicsPanel1, cell_size, Map[(0, 0)].size);
+            var offset = CalcOffset(this.graphicsPanelMain, cell_size, this.Map[(0, 0)].size);
 
-            Pen gridPen = new Pen(gridColor, 1);
-            Brush cellBrush = new SolidBrush(cellColor);
+            Pen gridPen = new Pen(this.gridColor, 1);
+            Brush cellBrush = new SolidBrush(this.cellColor);
 
-            Map[(0, 0)].ForEach((x, y) => {
+            this.Map[(0, 0)].ForEach((x, y) => {
                 Rectangle cellRect = new Rectangle(
-                    (int)x * cell_size + offset.x,
-                    (int)y * cell_size + offset.y,
+                    x * cell_size + offset.x,
+                    y * cell_size + offset.y,
                     cell_size, cell_size
                 );
 
-                if (Map[(0, 0)].Is(x, y, true))
-                {
+                if (this.Map[(0, 0)].Get(x, y).IsAlive) {
                     e.Graphics.FillRectangle(cellBrush, cellRect);
                 }
 
@@ -94,29 +78,25 @@ namespace month_6_Project_and_Portfolio_I
             cellBrush.Dispose();
         }
 
-        private void graphicsPanel1_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                int cell_size = CellSize(graphicsPanel1, Map[(0, 0)].size);
+        private void graphicsPanelMain_MouseClick(object sender, MouseEventArgs e) {
+            if (e.Button == MouseButtons.Left) {
+                int cell_size = CellSize(this.graphicsPanelMain, this.Map[(0, 0)].size);
 
-                (int x, int y) offset = CalcOffset(graphicsPanel1, cell_size, Map[(0, 0)].size);
+                var offset = CalcOffset(this.graphicsPanelMain, cell_size, this.Map[(0, 0)].size);
 
-                (uint x, uint y) cell_clicked = (
-                    (uint)((e.X - offset.x) / cell_size),
-                    (uint)((e.Y - offset.y) / cell_size)
+                (int x, int y) cell_clicked = (
+                    (e.X - offset.x) / cell_size,
+                    (e.Y - offset.y) / cell_size
                 );
 
-                // Toggle the cell's state
-                Map[(0, 0)].Toggle(cell_clicked.x, cell_clicked.y);
+                this.Map[(0, 0)].Toggle(cell_clicked);
 
                 // Tell Windows you need to repaint
-                graphicsPanel1.Invalidate();
+                this.graphicsPanelMain.Invalidate();
             }
         }
 
-        private void toolStripStart_Click(object sender, EventArgs e)
-        {
+        private void toolStripStart_Click(object sender, EventArgs e) {
             this.timer.Start();
         }
     }
