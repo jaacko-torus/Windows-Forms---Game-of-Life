@@ -16,6 +16,7 @@ namespace month_6_Project_and_Portfolio_I
         public Cell[,] cells;
         
         public List<(int x, int y)> alive_list = new List<(int x, int y)>();
+        private Dictionary<(int x, int y), int> inside_cells = new Dictionary<(int x, int y), int>();
 
         public Block(int x_position, int y_position, int block_size) {
             this.coord_id = (x_position, y_position);
@@ -90,6 +91,7 @@ namespace month_6_Project_and_Portfolio_I
 
                 // cell
                 this.Get(x, y).Draw(e, brush, cellRect);
+                this.Get(x, y).Write(e, brush, cellRect, (x, y).ToString());
 
                 // grid
                 e.Graphics.DrawRectangle(pen, cellRect);
@@ -108,7 +110,10 @@ namespace month_6_Project_and_Portfolio_I
             );
         }
 
-        public Dictionary<(int x, int y), int> Next() {
+        public (
+            Dictionary<(int x, int y), int> inside_cells,
+            Dictionary<(int x, int y), int> outside_cells
+        ) Next() {
             /**
              * `inside_cells` is the list of cells inside the block that have at least one neighbour,
              * and it includes info of how many neighbours they have.
@@ -118,7 +123,8 @@ namespace month_6_Project_and_Portfolio_I
              */
 
             // Dictionary of Neighbour to Count
-            var inside_cells = new Dictionary<(int x, int y), int>();
+            //var inside_cells = new Dictionary<(int x, int y), int>();
+            this.inside_cells.Clear();
             var outside_cells = new Dictionary<(int x, int y), int>();
 
             this.MatrixScanAliveCells((cell) => {
@@ -130,10 +136,10 @@ namespace month_6_Project_and_Portfolio_I
                     { d.Add(c, 1); }
                 }
 
-                set_or_increment(this.IsOutsideCell(cell) ? outside_cells : inside_cells, cell);
+                set_or_increment(this.IsOutsideCell(cell) ? outside_cells : this.inside_cells, cell);
             });
 
-            foreach (KeyValuePair<(int x, int y), int> cell in inside_cells) {
+            foreach (var cell in inside_cells) {
                 bool cell_is_alive = this.Get(cell.Key).IsAlive;
 
                 // if alive and not (2 or 3) neighbours -> dead
@@ -155,7 +161,7 @@ namespace month_6_Project_and_Portfolio_I
                 }
             }
 
-            return outside_cells;
+            return (inside_cells, outside_cells);
         }
     }
 }

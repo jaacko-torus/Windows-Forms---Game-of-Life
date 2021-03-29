@@ -33,5 +33,11 @@ namespace month_6_Project_and_Portfolio_I {
                 e.Graphics.FillRectangle(brush, rectangle);
             }
         }
+
+        public void Write(PaintEventArgs e, Brush brush, Rectangle rectangle, string text) {
+            Brush text_brush = new SolidBrush(Color.FromArgb(0xff, 0xff, 0xff));
+            e.Graphics.DrawString("0", SystemFonts.DefaultFont, text_brush, rectangle.X, rectangle.Y);
+            text_brush.Dispose();
+        }
     }
 }

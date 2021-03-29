@@ -20,7 +20,12 @@ namespace month_6_Project_and_Portfolio_I
         public int block_size;
         public int cell_size;
         public (int x, int y) offset;
-        public (int x, int y) center;
+        public (int x, int y) center {
+            get => (
+                this.offset.x - (this.cell_size * this.block_size) / 2,
+                this.offset.y - (this.cell_size * this.block_size) / 2
+            );
+        }
 
         private Dictionary<(int x, int y), Block> map = new Dictionary<(int x, int y), Block>();
 
@@ -33,7 +38,8 @@ namespace month_6_Project_and_Portfolio_I
 
             this.block_size = 10;
 
-            DefaultSingleBlockStyle();
+            this.cell_size = DefaultCellSize(this.graphicsPanelMain);
+            this.offset = DefaultOffset(this.graphicsPanelMain);
 
             this.map.Add((0, 0), new Block(0, 0, this.block_size));
 
@@ -70,9 +76,14 @@ namespace month_6_Project_and_Portfolio_I
             (panel.ClientSize.Height - (this.cell_size * this.block_size)) / 2
         );
 
-        private void DefaultSingleBlockStyle() {
-            this.cell_size = DefaultCellSize(this.graphicsPanelMain);
-            this.offset = DefaultOffset(this.graphicsPanelMain);
+        private bool isInScreen(int x, int y) {
+            int max_x = this.graphicsPanelMain.ClientSize.Width;
+            int max_y = this.graphicsPanelMain.ClientSize.Height;
+
+            return (
+                0 < x && x < max_x &&
+                0 < y && y < max_y
+            );
         }
 
         // Calculate the next generation of cells
@@ -84,6 +95,9 @@ namespace month_6_Project_and_Portfolio_I
 
             // Update status strip generations
             this.toolStripStatusLabelGenerations.Text = $"Generation {this.generation}";
+
+            // Redraw
+            this.Redraw();
         }
 
         private void graphicsPanelMain_Paint(object sender, PaintEventArgs e) {
