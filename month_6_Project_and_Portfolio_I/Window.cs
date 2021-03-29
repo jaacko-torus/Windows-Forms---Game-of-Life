@@ -22,6 +22,10 @@ namespace month_6_Project_and_Portfolio_I
         Color gridNextToCellColor = Color.FromArgb(0xD0, 0x70, 0x7F); // #D0707F Using relative to cellColor
         Color cellColor           = Color.FromArgb(0xBF, 0x61, 0x6A); // #BF616A
 
+        Dictionary<(int x, int y), Block> Map = new Dictionary<(int x, int y), Block>() {
+            { (0,0), new Block(0, 0, 10) }
+        };
+
         // The Timer class
         Timer timer = new Timer();
 
@@ -55,42 +59,36 @@ namespace month_6_Project_and_Portfolio_I
             NextGeneration();
         }
 
+        private int CellSize(GraphicsPanel panel, int size) => Math.Min(panel.ClientSize.Width / size, panel.ClientSize.Height / size);
+        private int CalcSingleOffset(int total_length, int cell_size, int amount) => (total_length - (cell_size * amount)) / 2;
+        private (int x, int y) CalcOffset(GraphicsPanel panel, int cell_size, int amount) => (
+            CalcSingleOffset(panel.ClientSize.Width, cell_size, amount),
+            CalcSingleOffset(panel.ClientSize.Height, cell_size, amount)
+        );
+
         private void graphicsPanel1_Paint(object sender, PaintEventArgs e)
         {
-            // cells should be square, find min of the two and make a block
-            int cellSize = Math.Min(
-                graphicsPanel1.ClientSize.Width / universe.GetLength(0),
-                graphicsPanel1.ClientSize.Height / universe.GetLength(1)
-            );
+            int cell_size = CellSize(graphicsPanel1, Map[(0, 0)].size);
 
-            Func<int, int, int, int> calc_offset = (int total_length, int cell_size, int amount) => (total_length - (cell_size * amount)) / 2;
-
-            (int x, int y) offset = (
-                calc_offset(graphicsPanel1.ClientSize.Width, cellSize, universe.GetLength(0)),
-                calc_offset(graphicsPanel1.ClientSize.Height, cellSize, universe.GetLength(1))
-            );
+            (int x, int y) offset = CalcOffset(graphicsPanel1, cell_size, Map[(0, 0)].size);
 
             Pen gridPen = new Pen(gridColor, 1);
             Brush cellBrush = new SolidBrush(cellColor);
 
-            for (int y = 0; y < universe.GetLength(1); y += 1)
-            {
-                for (int x = 0; x < universe.GetLength(0); x += 1)
+            Map[(0, 0)].ForEach((x, y) => {
+                Rectangle cellRect = new Rectangle(
+                    (int)x * cell_size + offset.x,
+                    (int)y * cell_size + offset.y,
+                    cell_size, cell_size
+                );
+
+                if (Map[(0, 0)].CellIs(x, y, true))
                 {
-                    Rectangle cellRect = new Rectangle(
-                        x * cellSize + offset.x,
-                        y * cellSize + offset.y,
-                        cellSize, cellSize
-                    );
-
-                    if (universe[x, y] == true)
-                    {
-                        e.Graphics.FillRectangle(cellBrush, cellRect);
-                    }
-
-                    e.Graphics.DrawRectangle(gridPen, cellRect);
+                    e.Graphics.FillRectangle(cellBrush, cellRect);
                 }
-            }
+
+                e.Graphics.DrawRectangle(gridPen, cellRect);
+            });
 
             gridPen.Dispose();
             cellBrush.Dispose();
@@ -100,24 +98,18 @@ namespace month_6_Project_and_Portfolio_I
         {
             if (e.Button == MouseButtons.Left)
             {
-                int cellSize = Math.Min(
-                    graphicsPanel1.ClientSize.Width / universe.GetLength(0),
-                    graphicsPanel1.ClientSize.Height / universe.GetLength(1)
-                );
+                int cell_size = CellSize(graphicsPanel1, Map[(0, 0)].size);
 
-                Func<int, int, int, int> calc_offset = (int total_length, int cell_size, int amount) => (total_length - (cell_size * amount)) / 2;
-
-                (int x, int y) offset = (
-                    calc_offset(graphicsPanel1.ClientSize.Width, cellSize, universe.GetLength(0)),
-                    calc_offset(graphicsPanel1.ClientSize.Height, cellSize, universe.GetLength(1))
-                );
+                (int x, int y) offset = CalcOffset(graphicsPanel1, cell_size, Map[(0, 0)].size);
 
                 // Calculate the cell that was clicked in
-                int x = (e.X - offset.x) / cellSize;
-                int y = (e.Y - offset.y) / cellSize;
+                (uint x, uint y) cell_clicked = (
+                    (uint)((e.X - offset.x) / cell_size),
+                    (uint)((e.Y - offset.y) / cell_size)
+                );
 
                 // Toggle the cell's state
-                universe[x, y] = !universe[x, y];
+                Map[(0, 0)].InvertCell(cell_clicked.x, cell_clicked.y);
 
                 // Tell Windows you need to repaint
                 graphicsPanel1.Invalidate();
