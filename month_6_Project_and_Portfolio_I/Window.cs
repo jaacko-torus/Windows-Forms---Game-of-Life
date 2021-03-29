@@ -102,7 +102,6 @@ namespace month_6_Project_and_Portfolio_I
 
                 (int x, int y) offset = CalcOffset(graphicsPanel1, cell_size, Map[(0, 0)].size);
 
-                // Calculate the cell that was clicked in
                 (uint x, uint y) cell_clicked = (
                     (uint)((e.X - offset.x) / cell_size),
                     (uint)((e.Y - offset.y) / cell_size)
@@ -114,6 +113,11 @@ namespace month_6_Project_and_Portfolio_I
                 // Tell Windows you need to repaint
                 graphicsPanel1.Invalidate();
             }
+        }
+
+        private void toolStripStart_Click(object sender, EventArgs e)
+        {
+            this.timer.Start();
         }
     }
 }
