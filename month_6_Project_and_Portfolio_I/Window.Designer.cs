@@ -64,6 +64,7 @@ namespace month_6_Project_and_Portfolio_I
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelGenerations = new System.Windows.Forms.ToolStripStatusLabel();
             this.graphicsPanelMain = new month_6_Project_and_Portfolio_I.GraphicsPanel();
+            this.toolStripButtonStep = new System.Windows.Forms.ToolStripButton();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -242,7 +243,8 @@ namespace month_6_Project_and_Portfolio_I
             this.copyToolStripButton,
             this.pasteToolStripButton,
             this.toolStripSeparator7,
-            this.toolStripStart});
+            this.toolStripStart,
+            this.toolStripButtonStep});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1184, 25);
@@ -350,6 +352,16 @@ namespace month_6_Project_and_Portfolio_I
             this.graphicsPanelMain.Paint += new System.Windows.Forms.PaintEventHandler(this.graphicsPanelMain_Paint);
             this.graphicsPanelMain.MouseClick += new System.Windows.Forms.MouseEventHandler(this.graphicsPanelMain_MouseClick);
             // 
+            // toolStripButtonStep
+            // 
+            this.toolStripButtonStep.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonStep.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonStep.Image")));
+            this.toolStripButtonStep.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonStep.Name = "toolStripButtonStep";
+            this.toolStripButtonStep.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButtonStep.Text = "toolStripButton1";
+            this.toolStripButtonStep.Click += new System.EventHandler(this.toolStripButtonStep_Click);
+            // 
             // Window
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -410,6 +422,7 @@ namespace month_6_Project_and_Portfolio_I
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelGenerations;
         private System.Windows.Forms.ToolStripButton toolStripStart;
+        private System.Windows.Forms.ToolStripButton toolStripButtonStep;
     }
 }
 

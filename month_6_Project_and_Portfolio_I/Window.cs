@@ -44,7 +44,7 @@ namespace month_6_Project_and_Portfolio_I
             this.map.Add((0, 0), new Block(0, 0, this.block_size));
 
             // Setup the timer
-            this.timer.Interval = 500;
+            this.timer.Interval = 200;
             this.timer.Tick += (object s, EventArgs e) => this.Next();
 
             // keyboard
@@ -59,10 +59,10 @@ namespace month_6_Project_and_Portfolio_I
             int speed = 10;
 
             switch (e.KeyCode) {
-                case Keys.Left:  this.offset.x -= speed; break;
-                case Keys.Right: this.offset.x += speed; break;
-                case Keys.Up:    this.offset.y -= speed; break;
-                case Keys.Down:  this.offset.y += speed; break;
+                case Keys.Left:  this.offset.x += speed; break;
+                case Keys.Right: this.offset.x -= speed; break;
+                case Keys.Up:    this.offset.y += speed; break;
+                case Keys.Down:  this.offset.y -= speed; break;
             }
 
             this.Redraw();
@@ -88,7 +88,6 @@ namespace month_6_Project_and_Portfolio_I
 
         // Calculate the next generation of cells
         private void Next() {
-
             this.map[(0, 0)].Next();
 
             this.generation += 1;
@@ -120,6 +119,8 @@ namespace month_6_Project_and_Portfolio_I
 
                     this.map[(0, 0)].Toggle(cell_clicked);
 
+                    this.map[(0, 0)].CountAllNeighbours();
+
                     this.Redraw();
                 }
             }
@@ -127,6 +128,12 @@ namespace month_6_Project_and_Portfolio_I
 
         private void toolStripStart_Click(object sender, EventArgs e) {
             this.timer.Start();
+        }
+
+        private void toolStripButtonStep_Click(object sender, EventArgs e)
+        {
+            this.Next();
+            this.Redraw();
         }
     }
 }

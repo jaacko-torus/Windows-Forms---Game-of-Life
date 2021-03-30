@@ -16,7 +16,7 @@ namespace month_6_Project_and_Portfolio_I
         public Cell[,] cells;
         
         public List<(int x, int y)> alive_list = new List<(int x, int y)>();
-        private Dictionary<(int x, int y), int> inside_cells = new Dictionary<(int x, int y), int>();
+        private Dictionary<(int x, int y), int> inner_cells = new Dictionary<(int x, int y), int>();
 
         public Block(int x_position, int y_position, int block_size) {
             this.coord_id = (x_position, y_position);
@@ -36,47 +36,23 @@ namespace month_6_Project_and_Portfolio_I
             }
         }
 
-        public Cell Get(int x, int y) => this.cells[x, y];
-        public Cell Get((int x, int y) cell) => this.Get(cell.x, cell.y);
+        public Cell Get((int x, int y) cell) => this.cells[cell.x, cell.y];
+        public void Set((int x, int y) cell, bool value) { this.cells[cell.x, cell.y].Set(value); }
 
-        public void Set(int x, int y, bool value) { this.cells[x, y].Set(value); }
-        public void Set((int x, int y) cell, bool value) { this.Set(cell.x, cell.y, value); }
+        public void Toggle((int x, int y) cell) {
+            this.cells[cell.x, cell.y].Toggle();
 
-        public void Toggle(int x, int y) {
-            this.cells[x, y].Toggle();
-
-            if (this.cells[x, y].IsAlive) {
-                this.alive_list.Add((x, y));
+            if (this.cells[cell.x, cell.y].IsAlive) {
+                this.alive_list.Add(cell);
             } else {
-                bool could_remove = this.alive_list.Remove((x, y));
-
-                if (!could_remove) {
-                    Console.WriteLine($"{x}, {y} was not alive");
-                }
+                this.alive_list.Remove(cell);
             }
         }
-        public void Toggle((int x, int y) cell) { this.Toggle(cell.x, cell.y); }
 
-        public bool IsOutsideCell((int x, int y) cell) => (
+        public bool IsOutsideBlock((int x, int y) cell) => (
             cell.x < 0 || this.block_size <= cell.x ||
             cell.y < 0 || this.block_size <= cell.y
         );
-
-        public delegate void MatrixScanAliveCellsCallback((int x, int y) cell);
-
-        public void MatrixScanAliveCells(
-            MatrixScanAliveCellsCallback callback
-            //ForEachNeighbourCallback inside_cells_callback,
-            //ForEachNeighbourCallback outside_cells_callback
-        ) {
-            this.alive_list.ForEach((cell) => {
-                for (int x_offset = -1; x_offset <= 1; x_offset += 1) {
-                    for (int y_offset = -1; y_offset <= 1; y_offset += 1) {
-                        callback((cell.x + x_offset, cell.y + y_offset));
-                    }
-                }
-            });
-        }
 
         public void Draw(
             PaintEventArgs e, Brush brush, Pen pen,
@@ -90,8 +66,8 @@ namespace month_6_Project_and_Portfolio_I
                 );
 
                 // cell
-                this.Get(x, y).Draw(e, brush, cellRect);
-                this.Get(x, y).Write(e, brush, cellRect, (x, y).ToString());
+                this.Get((x, y)).Draw(e, brush, cellRect);
+                this.Get((x, y)).Write(e, brush, cellRect);
 
                 // grid
                 e.Graphics.DrawRectangle(pen, cellRect);
@@ -110,58 +86,75 @@ namespace month_6_Project_and_Portfolio_I
             );
         }
 
-        public (
-            Dictionary<(int x, int y), int> inside_cells,
-            Dictionary<(int x, int y), int> outside_cells
-        ) Next() {
-            /**
-             * `inside_cells` is the list of cells inside the block that have at least one neighbour,
-             * and it includes info of how many neighbours they have.
-             * 
-             * `outside_cells` is the same but only includes cells outside the block. They are returned
-             * for the main program to do something with them.
-             */
+        public delegate void ScanMatrixCallback((int x, int y) offset);
 
-            // Dictionary of Neighbour to Count
-            //var inside_cells = new Dictionary<(int x, int y), int>();
-            this.inside_cells.Clear();
-            var outside_cells = new Dictionary<(int x, int y), int>();
+        public void Scan3x3Matrix(ScanMatrixCallback callback) {
+            for (int x_offset = -1; x_offset <= 1; x_offset += 1) {
+                for (int y_offset = -1; y_offset <= 1; y_offset += 1) {
+                    if (x_offset == 0 && y_offset == 0) { continue; }
 
-            this.MatrixScanAliveCells((cell) => {
-                // d -> dictionary, c -> cell
-                void set_or_increment(Dictionary<(int x, int y), int> d, (int x, int y) c) {
-                    if (d.ContainsKey(c))
-                    { d[c] += 1; }
-                    else
-                    { d.Add(c, 1); }
-                }
-
-                set_or_increment(this.IsOutsideCell(cell) ? outside_cells : this.inside_cells, cell);
-            });
-
-            foreach (var cell in inside_cells) {
-                bool cell_is_alive = this.Get(cell.Key).IsAlive;
-
-                // if alive and not (2 or 3) neighbours -> dead
-                bool dead_condition = (
-                    cell_is_alive == true &&
-                    !(cell.Value == 2 || cell.Value == 3)
-                );
-
-                // if dead and 3 neighbours -> alive
-                bool alive_condition = (
-                    cell_is_alive == false &&
-                    cell.Value == 3
-                );
-
-                if (dead_condition) {
-                    this.Set(cell.Key, false);
-                } else if (alive_condition) {
-                    this.Set(cell.Key, true);
+                    callback((x_offset, y_offset));
                 }
             }
+        }
 
-            return (inside_cells, outside_cells);
+        public int CountNeighbours((int x, int y) cell) {
+            int count = 0;
+
+            Scan3x3Matrix((offset) => {
+                var curr_neighbour = (cell.x + offset.x, cell.y + offset.y);
+
+                if (IsOutsideBlock(curr_neighbour)) {
+                    // if outside of block, fetch the right block
+                    // and get state of cell
+                    // otherwise assume dead
+                } else if (this.Get(curr_neighbour).IsAlive) {
+                    count += 1;
+                }
+            });
+
+            return count;
+        }
+
+        public void CountAllNeighbours() {
+            this.alive_list.Distinct().ToList().ForEach((alive_cell) => {
+                Scan3x3Matrix((offset) => {
+                    var neighbour = (alive_cell.x + offset.x, alive_cell.y + offset.y);
+                    this.inner_cells[neighbour] = 0;
+                });
+            });
+
+            this.inner_cells.ToList().ForEach((neighbour) => {
+                if (IsOutsideBlock(neighbour.Key)) {
+                    // nothing for now
+                } else {
+                    this.inner_cells[neighbour.Key] = CountNeighbours(neighbour.Key);
+                    this.Get(neighbour.Key).neighbours = this.inner_cells[neighbour.Key];
+                }
+            });
+        }
+
+        public void Next() {
+            Console.Clear();
+
+            CountAllNeighbours();
+
+            this.inner_cells.ToList().ForEach((neighbour) => {
+                if (IsOutsideBlock(neighbour.Key)) {
+                    // nothing for now
+                } else {
+                    bool next_state = this.Get(neighbour.Key).StateFromNeighbours(neighbour.Value);
+                    this.Get(neighbour.Key).Set(next_state);
+
+                    if (next_state == true) {
+                        alive_list.Add(neighbour.Key);
+                    } else {
+                        alive_list.Remove(neighbour.Key);
+                    }
+                }
+            });
+
+            CountAllNeighbours();
         }
     }
 }
