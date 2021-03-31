@@ -31,15 +31,15 @@ namespace month_6_Project_and_Portfolio_I
             this.block_size = block_size;
             this.cells = new Cell[block_size, block_size];
 
-            this.ForEach((x, y) => this.cells[x, y] = new Cell(x, y, false));
+            this.ForEach((cell) => this.cells[cell.x, cell.y] = new Cell(cell, false));
         }
 
-        public delegate void ForEachCallback(int x, int y);
+        public delegate void ForEachCallback((int x, int y) cell);
 
         public void ForEach(ForEachCallback callback) {
-            for (int y = 0; y < this.cells.GetLength(1); y += 1) {
-                for (int x = 0; x < this.cells.GetLength(0); x += 1) {
-                    callback(x, y);
+            for (int x = 0; x < this.cells.GetLength(0); x += 1) {
+                for (int y = 0; y < this.cells.GetLength(1); y += 1) {
+                    callback((x, y));
                 }
             }
         }
@@ -66,16 +66,16 @@ namespace month_6_Project_and_Portfolio_I
             PaintEventArgs e, Brush brush, Pen pen,
             int cell_size, (int x, int y) offset
         ) {
-            this.ForEach((x, y) => {
+            this.ForEach((cell) => {
                 Rectangle cellRect = new Rectangle(
-                    x * cell_size + offset.x,
-                    y * cell_size + offset.y,
+                    cell.x * cell_size + offset.x,
+                    cell.y * cell_size + offset.y,
                     cell_size, cell_size
                 );
 
                 // cell
-                this.Get((x, y)).Draw(e, brush, cellRect);
-                this.Get((x, y)).Write(e, brush, cellRect);
+                this.Get(cell).Draw(e, brush, cellRect);
+                this.Get(cell).Write(e, brush, cellRect);
 
                 // grid
                 e.Graphics.DrawRectangle(pen, cellRect);

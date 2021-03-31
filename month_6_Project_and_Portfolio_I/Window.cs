@@ -13,9 +13,14 @@ namespace month_6_Project_and_Portfolio_I
     public partial class Window : Form
     {
         // Drawing colors, Pallette https://www.nordtheme.com/docs/colors-and-palettes
-        private readonly Color grid_color      = Color.FromArgb(0x3B, 0x42, 0x52); // #3B4252
-        private readonly Color cell_grid_color = Color.FromArgb(0xD0, 0x70, 0x7F); // #D0707F Using relative to cell_color
-        private readonly Color cell_color      = Color.FromArgb(0xBF, 0x61, 0x6A); // #BF616A
+        private readonly Dictionary<string, Color> colors = new Dictionary<string, Color>() {
+            // #3B4252
+            { "grid",                Color.FromArgb(0x3B, 0x42, 0x52) },
+            // #D0707F a darker `colors["cell"]` not in pallette
+            { "cell_adjecent_color", Color.FromArgb(0xD0, 0x70, 0x7F) },
+            // #BF616A
+            { "cell",                Color.FromArgb(0xBF, 0x61, 0x6A) }
+        };
 
         public int block_size;
         public int cell_size;
@@ -52,6 +57,14 @@ namespace month_6_Project_and_Portfolio_I
             this.graphicsPanelMain.Invalidate();
         }
 
+        public void ToggleTimer() {
+            if (this.timer.Enabled) {
+                this.timer.Stop();
+            } else {
+                this.timer.Start();
+            }
+        }
+
         private void KeyEventHandler(object sender, KeyEventArgs e) {
             int speed = 10;
 
@@ -60,6 +73,7 @@ namespace month_6_Project_and_Portfolio_I
                 case Keys.Right: this.offset.x -= speed; break;
                 case Keys.Up:    this.offset.y += speed; break;
                 case Keys.Down:  this.offset.y -= speed; break;
+                case Keys.Space: this.ToggleTimer(); break;
             }
 
             this.Redraw();
@@ -89,7 +103,7 @@ namespace month_6_Project_and_Portfolio_I
 
             this.generation += 1;
 
-            // Update status strip generations
+            // Update generation in GUI
             this.toolStripStatusLabelGenerations.Text = $"Generation {this.generation}";
 
             // Redraw
@@ -97,8 +111,8 @@ namespace month_6_Project_and_Portfolio_I
         }
 
         private void graphicsPanelMain_Paint(object sender, PaintEventArgs e) {
-            Pen grid_pen = new Pen(this.grid_color, 1);
-            Brush cell_brush = new SolidBrush(this.cell_color);
+            Pen grid_pen = new Pen(this.colors["grid"], 1);
+            Brush cell_brush = new SolidBrush(this.colors["cell"]);
 
             this.map[(0, 0)].Draw(e, cell_brush, grid_pen, this.cell_size, offset);
 
@@ -127,7 +141,6 @@ namespace month_6_Project_and_Portfolio_I
                      * `cell.neighbours = <int>` with error correction.
                      * Instead I need to find neighbours myself by matrix scanning myself.
                      */
-
                     Block.Scan3x3Matrix(clicked_cell, (clicked_cell_neighbour) =>
                         this.map[(0, 0)].CountAndSetCellNeighbours(clicked_cell_neighbour));
 
@@ -142,7 +155,6 @@ namespace month_6_Project_and_Portfolio_I
 
         private void toolStripButtonStep_Click(object sender, EventArgs e) {
             this.Next();
-            this.Redraw();
         }
 
         private void toolStripButtonStop_Click(object sender, EventArgs e) {
