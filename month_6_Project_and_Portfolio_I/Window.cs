@@ -106,32 +106,52 @@ namespace month_6_Project_and_Portfolio_I
             cell_brush.Dispose();
         }
 
+        private (int x, int y) findClickedCell((int x, int y) mouse) => (
+            (mouse.x - this.offset.x) / this.cell_size,
+            (mouse.y - this.offset.y) / this.cell_size
+        );
+
         private void graphicsPanelMain_MouseClick(object sender, MouseEventArgs e) {
             if (e.Button == MouseButtons.Left) {
-                if (this.map[(0, 0)].Within(e.X, e.Y, this.cell_size, offset)) {
-                    (int x, int y) cell_clicked = (
-                        (e.X - this.offset.x) / this.cell_size,
-                        (e.Y - this.offset.y) / this.cell_size
-                    );
+                var mouse_position = (e.X, e.Y);
 
-                    this.map[(0, 0)].Toggle(cell_clicked);
+                if (this.map[(0, 0)].Within(mouse_position, this.cell_size, offset)) {
+                    (int x, int y) clicked_cell = findClickedCell(mouse_position);
 
-                    this.map[(0, 0)].ResetNeighbours();
-                    this.map[(0, 0)].CountAndSetNeighbours();
+                    this.map[(0, 0)].Toggle(clicked_cell);
 
+                    this.map[(0, 0)].ResetCellNeighbours(clicked_cell);
+
+                    /**
+                     * NOTE: can't use `CountAndSetCellNeighbours` since it's a wrapper for
+                     * `cell.neighbours = <int>` with error correction.
+                     * Instead I need to find neighbours myself by matrix scanning myself.
+                     */
+
+                    Block.Scan3x3Matrix(clicked_cell, (clicked_cell_neighbour) =>
+                        this.map[(0, 0)].CountAndSetCellNeighbours(clicked_cell_neighbour));
 
                     this.Redraw();
                 }
             }
         }
-
-        private void toolStripStart_Click(object sender, EventArgs e) {
+        
+        private void toolStripButtonStart_Click(object sender, EventArgs e) {
             this.timer.Start();
         }
 
         private void toolStripButtonStep_Click(object sender, EventArgs e) {
             this.Next();
             this.Redraw();
+        }
+
+        private void toolStripButtonStop_Click(object sender, EventArgs e) {
+            /**
+             * NOTE: this should never mess with the internal logic since
+             * `timer.Tick` only calls `this.Next` and there are no threads,
+             * so I can feel safe only stopping the timer.
+             */
+            this.timer.Stop();
         }
     }
 }

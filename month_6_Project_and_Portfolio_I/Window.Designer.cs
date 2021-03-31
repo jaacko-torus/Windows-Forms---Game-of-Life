@@ -60,11 +60,12 @@ namespace month_6_Project_and_Portfolio_I
             this.copyToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.pasteToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripStart = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonStart = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonStep = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelGenerations = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripButtonStep = new System.Windows.Forms.ToolStripButton();
             this.graphicsPanelMain = new month_6_Project_and_Portfolio_I.GraphicsPanel();
+            this.toolStripButtonStop = new System.Windows.Forms.ToolStripButton();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -243,8 +244,9 @@ namespace month_6_Project_and_Portfolio_I
             this.copyToolStripButton,
             this.pasteToolStripButton,
             this.toolStripSeparator7,
-            this.toolStripStart,
-            this.toolStripButtonStep});
+            this.toolStripButtonStart,
+            this.toolStripButtonStep,
+            this.toolStripButtonStop});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1184, 25);
@@ -315,15 +317,25 @@ namespace month_6_Project_and_Portfolio_I
             this.toolStripSeparator7.Name = "toolStripSeparator7";
             this.toolStripSeparator7.Size = new System.Drawing.Size(6, 25);
             // 
-            // toolStripStart
+            // toolStripButtonStart
             // 
-            this.toolStripStart.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripStart.Image = ((System.Drawing.Image)(resources.GetObject("toolStripStart.Image")));
-            this.toolStripStart.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripStart.Name = "toolStripStart";
-            this.toolStripStart.Size = new System.Drawing.Size(23, 22);
-            this.toolStripStart.Text = "toolStripButton1";
-            this.toolStripStart.Click += new System.EventHandler(this.toolStripStart_Click);
+            this.toolStripButtonStart.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonStart.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonStart.Image")));
+            this.toolStripButtonStart.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonStart.Name = "toolStripButtonStart";
+            this.toolStripButtonStart.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButtonStart.Text = "toolStripButton1";
+            this.toolStripButtonStart.Click += new System.EventHandler(this.toolStripButtonStart_Click);
+            // 
+            // toolStripButtonStep
+            // 
+            this.toolStripButtonStep.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonStep.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonStep.Image")));
+            this.toolStripButtonStep.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonStep.Name = "toolStripButtonStep";
+            this.toolStripButtonStep.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButtonStep.Text = "toolStripButton1";
+            this.toolStripButtonStep.Click += new System.EventHandler(this.toolStripButtonStep_Click);
             // 
             // statusStrip1
             // 
@@ -341,16 +353,6 @@ namespace month_6_Project_and_Portfolio_I
             this.toolStripStatusLabelGenerations.Size = new System.Drawing.Size(90, 17);
             this.toolStripStatusLabelGenerations.Text = "Generations = 0";
             // 
-            // toolStripButtonStep
-            // 
-            this.toolStripButtonStep.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButtonStep.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonStep.Image")));
-            this.toolStripButtonStep.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButtonStep.Name = "toolStripButtonStep";
-            this.toolStripButtonStep.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButtonStep.Text = "toolStripButton1";
-            this.toolStripButtonStep.Click += new System.EventHandler(this.toolStripButtonStep_Click);
-            // 
             // graphicsPanelMain
             // 
             this.graphicsPanelMain.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(52)))), ((int)(((byte)(64)))));
@@ -361,6 +363,16 @@ namespace month_6_Project_and_Portfolio_I
             this.graphicsPanelMain.TabIndex = 3;
             this.graphicsPanelMain.Paint += new System.Windows.Forms.PaintEventHandler(this.graphicsPanelMain_Paint);
             this.graphicsPanelMain.MouseClick += new System.Windows.Forms.MouseEventHandler(this.graphicsPanelMain_MouseClick);
+            // 
+            // toolStripButtonStop
+            // 
+            this.toolStripButtonStop.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonStop.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonStop.Image")));
+            this.toolStripButtonStop.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonStop.Name = "toolStripButtonStop";
+            this.toolStripButtonStop.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButtonStop.Text = "toolStripButton1";
+            this.toolStripButtonStop.Click += new System.EventHandler(this.toolStripButtonStop_Click);
             // 
             // Window
             // 
@@ -422,8 +434,9 @@ namespace month_6_Project_and_Portfolio_I
         private System.Windows.Forms.ToolStripButton pasteToolStripButton;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelGenerations;
-        private System.Windows.Forms.ToolStripButton toolStripStart;
+        private System.Windows.Forms.ToolStripButton toolStripButtonStart;
         private System.Windows.Forms.ToolStripButton toolStripButtonStep;
+        private System.Windows.Forms.ToolStripButton toolStripButtonStop;
     }
 }
 

@@ -17,6 +17,12 @@ namespace month_6_Project_and_Portfolio_I
         
         public HashSet<(int x, int y)> alive_list = new HashSet<(int x, int y)>();
 
+        /**
+         * NOTE: inner and outer cells
+         * These refer to cells that are or are neighbours of alive cells.
+         * Inner are those within a block
+         * Outer are those outside a block
+         */
         private Dictionary<(int x, int y), int> inner_cells = new Dictionary<(int x, int y), int>();
         private Dictionary<(int x, int y), int> outer_cells = new Dictionary<(int x, int y), int>();
 
@@ -76,15 +82,15 @@ namespace month_6_Project_and_Portfolio_I
             });
         }
 
-        public bool Within(int x, int y, int cell_size, (int x, int y) offset) {
+        public bool Within((int x, int y) mouse, int cell_size, (int x, int y) offset) {
             int x_min = offset.x;
             int y_min = offset.y;
             int x_max = cell_size * this.block_size + offset.x;
             int y_max = cell_size * this.block_size + offset.y;
 
             return (
-                x_min < x && x < x_max &&
-                y_min < y && y < y_max
+                x_min < mouse.x && mouse.x < x_max &&
+                y_min < mouse.y && mouse.y < y_max
             );
         }
 
@@ -113,27 +119,34 @@ namespace month_6_Project_and_Portfolio_I
             return count;
         }
 
-        public void ResetNeighbours() {
-            this.alive_list.ToList().ForEach((alive_cell) => {
-                Block.Scan3x3Matrix(alive_cell, (neighbour) => {
-                    this.inner_cells[neighbour] = 0;
-                });
+        public void ResetCellNeighbours((int x, int y) cell) {
+            Block.Scan3x3Matrix(cell, (neighbour) => {
+                this.inner_cells[neighbour] = 0;
             });
         }
 
-        // CountAndSetNeighbours
+        public void ResetNeighbours() {
+            this.alive_list.ToList().ForEach((alive_cell) => {
+                this.ResetCellNeighbours(alive_cell);
+            });
+        }
+        
+        public void CountAndSetCellNeighbours((int x, int y) cell) {
+            int neighbour_count = CountCellNeighbours(cell);
+
+            if (IsOutsideBlock(cell)) {
+                // NOTE: I should count neighbours from cells that are outsider cells
+                // so that I can return that data to the right cell.
+                this.outer_cells[cell] = neighbour_count;
+            } else {
+                this.inner_cells[cell] = neighbour_count;
+                this.Get(cell).neighbours = neighbour_count;
+            }
+        }
+
         public void CountAndSetNeighbours() {
             this.inner_cells.Keys.ToList().ForEach((neighbour) => {
-                int neighbour_count = CountCellNeighbours(neighbour);
-
-                if (IsOutsideBlock(neighbour)) {
-                    // NOTE: I should count neighbours from cells that are outsider cells
-                    // so that I can return that data to the right cell.
-                    this.outer_cells[neighbour] = neighbour_count;
-                } else {
-                    this.inner_cells[neighbour] = neighbour_count;
-                    this.Get(neighbour).neighbours = neighbour_count;
-                }
+                this.CountAndSetCellNeighbours(neighbour);
             });
         }
 
@@ -150,21 +163,6 @@ namespace month_6_Project_and_Portfolio_I
                         alive_list.Add(neighbour);
                     } else {
                         alive_list.Remove(neighbour);
-                    }
-                }
-            });
-
-            this.inner_cells.ToList().ForEach((neighbour) => {
-                if (IsOutsideBlock(neighbour.Key)) {
-                    // nothing for now
-                } else {
-                    bool next_state = this.Get(neighbour.Key).StateFromNeighbours(neighbour.Value);
-                    this.Get(neighbour.Key).Set(next_state);
-
-                    if (next_state == true) {
-                        alive_list.Add(neighbour.Key);
-                    } else {
-                        alive_list.Remove(neighbour.Key);
                     }
                 }
             });
