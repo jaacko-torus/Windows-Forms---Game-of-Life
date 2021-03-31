@@ -8,6 +8,17 @@ using System.Windows.Forms;
 
 namespace month_6_Project_and_Portfolio_I {
     static class Universe {
+        public static int block_size;
+        public static int cell_size;
+        public static (int x, int y) offset;
+
+        public static int generation = 0;
+
+        public static Dictionary<(int x, int y), Block> map {
+            get;
+            private set;
+        } = new Dictionary<(int x, int y), Block>();
+        
         // Drawing colors, Pallette https://www.nordtheme.com/docs/colors-and-palettes
         public static Dictionary<string, Color> colors = new Dictionary<string, Color>() {
             // #3B4252
@@ -20,16 +31,7 @@ namespace month_6_Project_and_Portfolio_I {
             { "cell_text",           Color.FromArgb(0xEC, 0xEF, 0xF4) }
         };
 
-        public static Dictionary<(int x, int y), Block> map {
-            get;
-            private set;
-        } = new Dictionary<(int x, int y), Block>();
-
-        
-        public static int block_size;
-        public static int cell_size;
-        public static (int x, int y) offset;
-        public static int generation = 0;
+        // getters
 
         public static (int x, int y) center {
             get => (
@@ -37,6 +39,21 @@ namespace month_6_Project_and_Portfolio_I {
                 Universe.offset.y - (Universe.cell_size * Universe.block_size) / 2
             );
         }
+
+        // Initializer
+
+        public static void Start(GraphicsPanel graphics_panel) {
+            Universe.block_size = 10;
+
+            Universe.cell_size = Universe.DefaultCellSize(graphics_panel);
+            Universe.offset = Universe.DefaultOffset(graphics_panel);
+
+            Universe.map.Add((0, 0), new Block(0, 0, Universe.block_size));
+        }
+
+        // helper
+
+        // getters
 
         public static int DefaultCellSize(GraphicsPanel graphics_panel) => Math.Min(
             graphics_panel.ClientSize.Width / Universe.block_size,
@@ -48,14 +65,12 @@ namespace month_6_Project_and_Portfolio_I {
             (graphics_panel.ClientSize.Height - (Universe.cell_size * Universe.block_size)) / 2
         );
 
-        public static void Start(GraphicsPanel graphics_panel) {
-            Universe.block_size = 10;
+        private static (int x, int y) FindClickedCell((int x, int y) mouse) => (
+            (mouse.x - Universe.offset.x) / Universe.cell_size,
+            (mouse.y - Universe.offset.y) / Universe.cell_size
+        );
 
-            Universe.cell_size = Universe.DefaultCellSize(graphics_panel);
-            Universe.offset = Universe.DefaultOffset(graphics_panel);
-
-            Universe.map.Add((0, 0), new Block(0, 0, Universe.block_size));
-        }
+        // side_effects
 
         public static void Draw(PaintEventArgs e) {
             var grid_pen = new Pen(Universe.colors["grid"], 1);
@@ -78,11 +93,6 @@ namespace month_6_Project_and_Portfolio_I {
             // Update generation in GUI
             generation_gui.Text = $"Generation {Universe.generation}";
         }
-
-        private static (int x, int y) FindClickedCell((int x, int y) mouse) => (
-            (mouse.x - Universe.offset.x) / Universe.cell_size,
-            (mouse.y - Universe.offset.y) / Universe.cell_size
-        );
 
         public static void SetCellAtMousePosition((int x, int y) mouse_position) {
             Universe.map.Values.ToList().ForEach((block) => {
