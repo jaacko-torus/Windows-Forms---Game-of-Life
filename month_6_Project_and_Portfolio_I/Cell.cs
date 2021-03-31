@@ -54,7 +54,7 @@ namespace month_6_Project_and_Portfolio_I {
             : neighbour_count == 3;
 
         // side effects
-
+        
         public void Draw(PaintEventArgs e, Rectangle rectangle) {
             if (this.IsAlive) {
                 e.Graphics.FillRectangle(Cell.cell_brush, rectangle);

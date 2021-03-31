@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing;
 
-namespace month_6_Project_and_Portfolio_I
-{
-    class Block
-    {
+namespace month_6_Project_and_Portfolio_I {
+    class Block {
+        public static Pen grid_pen;
+
         public readonly (int x, int y) coord_id;
         public readonly int block_size;
 
@@ -27,10 +27,15 @@ namespace month_6_Project_and_Portfolio_I
 
         // constructor
 
-        public Block(int x_position, int y_position, int block_size) {
-            this.coord_id = (x_position, y_position);
+        public Block((int x, int y) position, int block_size, Dictionary<string, Color> colors) {
+            this.coord_id = position;
             this.block_size = block_size;
             this.cells = new Cell[block_size, block_size];
+
+            Block.grid_pen = new Pen(Universe.colors["grid"], 1);
+
+            Cell.font_brush = new SolidBrush(Universe.colors["cell_text"]);
+            Cell.cell_brush = new SolidBrush(Universe.colors["cell"]);
 
             Cell.font_string_format = new StringFormat {
                 Alignment = StringAlignment.Center,
@@ -52,14 +57,19 @@ namespace month_6_Project_and_Portfolio_I
         );
 
         public bool Within((int x, int y) mouse, int cell_size, (int x, int y) offset) {
-            int x_min = offset.x;
-            int y_min = offset.y;
-            int x_max = cell_size * this.block_size + offset.x;
-            int y_max = cell_size * this.block_size + offset.y;
+            int real_block_size = this.block_size * cell_size;
+            (int x, int y) grid_offset = (this.coord_id.x * real_block_size, this.coord_id.y * real_block_size);
+            (int x, int y) total_offset = (offset.x + grid_offset.x, offset.y + grid_offset.y);
+
+            (int x, int y) min = total_offset;
+            (int x, int y) max = (
+                real_block_size + total_offset.x,
+                real_block_size + total_offset.y
+            );
 
             return (
-                x_min < mouse.x && mouse.x < x_max &&
-                y_min < mouse.y && mouse.y < y_max
+                min.x < mouse.x && mouse.x < max.x &&
+                min.y < mouse.y && mouse.y < max.y
             );
         }
 
@@ -147,15 +157,8 @@ namespace month_6_Project_and_Portfolio_I
 
         public void Draw(
             PaintEventArgs e,
-            Dictionary<string, Color> colors,
-            Brush brush, Pen pen,
             int cell_size, (int x, int y) offset
         ) {
-            Cell.font_brush = new SolidBrush(colors["cell_text"]);
-            Cell.font = new Font("Arial", cell_size / 3f);
-
-            Cell.cell_brush = brush;
-
             this.ForEach((cell) => {
                 Rectangle cell_rectangle = new Rectangle(
                     cell.x * cell_size + offset.x,
@@ -168,7 +171,7 @@ namespace month_6_Project_and_Portfolio_I
                 this.Get(cell).Write(e, cell_rectangle);
 
                 // grid
-                e.Graphics.DrawRectangle(pen, cell_rectangle);
+                e.Graphics.DrawRectangle(Block.grid_pen, cell_rectangle);
             });
         }
 

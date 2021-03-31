@@ -79,7 +79,7 @@ namespace month_6_Project_and_Portfolio_I {
 
         private void graphicsPanelMain_MouseClick(object sender, MouseEventArgs e) {
             if (e.Button == MouseButtons.Left) {
-                Universe.SetCellAtMousePosition((e.X, e.Y));
+                Universe.ToggleCellAtMousePosition((e.X, e.Y));
                 this.redraw();
             }
         }

@@ -9,7 +9,14 @@ using System.Windows.Forms;
 namespace month_6_Project_and_Portfolio_I {
     static class Universe {
         public static int block_size;
-        public static int cell_size;
+
+        public static int cell_size {
+            get => Universe._cell_size;
+            set {
+                Universe._cell_size = value;
+                Cell.font = new Font("Arial", Universe.cell_size / 3f);
+            }
+        }
         public static (int x, int y) offset;
 
         public static int generation = 0;
@@ -18,7 +25,7 @@ namespace month_6_Project_and_Portfolio_I {
             get;
             private set;
         } = new Dictionary<(int x, int y), Block>();
-        
+
         // Drawing colors, Pallette https://www.nordtheme.com/docs/colors-and-palettes
         public static Dictionary<string, Color> colors = new Dictionary<string, Color>() {
             // #3B4252
@@ -40,6 +47,10 @@ namespace month_6_Project_and_Portfolio_I {
             );
         }
 
+        // private
+
+        private static int _cell_size;
+
         // Initializer
 
         public static void Start(GraphicsPanel graphics_panel) {
@@ -48,7 +59,9 @@ namespace month_6_Project_and_Portfolio_I {
             Universe.cell_size = Universe.DefaultCellSize(graphics_panel);
             Universe.offset = Universe.DefaultOffset(graphics_panel);
 
-            Universe.map.Add((0, 0), new Block(0, 0, Universe.block_size));
+            Block.Scan3x3Matrix((0, 0), (block_coords) => {
+                Universe.map.Add(block_coords, new Block(block_coords, Universe.block_size, Universe.colors));
+            });
         }
 
         // helper
@@ -65,23 +78,38 @@ namespace month_6_Project_and_Portfolio_I {
             (graphics_panel.ClientSize.Height - (Universe.cell_size * Universe.block_size)) / 2
         );
 
-        private static (int x, int y) FindClickedCell((int x, int y) mouse) => (
-            (mouse.x - Universe.offset.x) / Universe.cell_size,
-            (mouse.y - Universe.offset.y) / Universe.cell_size
+        // https://en.wikipedia.org/wiki/Modulo_operation
+        public static int mod1(int a, int b) => a - b * (a / b);
+        public static int mod2(int a, int b) => a - b * (int)Math.Floor((double)a / (double)b);
+        public static int mod3(int a, int b) => a - (int)Math.Abs(b) * (int)Math.Floor((double)a / (double)Math.Abs(b));
+        public static int block_real_size { get => Universe.cell_size * Universe.block_size; }
+
+        private static (int x, int y) FindClickedCell((int x, int y) mouse) {
+            return (
+                mod3((mouse.x - Universe.offset.x), Universe.block_real_size) / Universe.cell_size,
+                mod3((mouse.y - Universe.offset.y), Universe.block_real_size) / Universe.cell_size
+            );
+        }
+
+        private static (int x, int y) Offset((int x, int y) position) => (
+            position.x + Universe.offset.x,
+            position.y + Universe.offset.y
+        );
+
+        private static (int x, int y) BlockGridOffset((int x, int y) block) => (
+            block.x * Universe.block_size * Universe.cell_size,
+            block.y * Universe.block_size * Universe.cell_size
         );
 
         // side_effects
 
         public static void Draw(PaintEventArgs e) {
-            var grid_pen = new Pen(Universe.colors["grid"], 1);
-            var cell_brush = new SolidBrush(Universe.colors["cell"]);
-
             Universe.map.Values.ToList().ForEach((block) => {
-                block.Draw(e, Universe.colors, cell_brush, grid_pen, Universe.cell_size, Universe.offset);
+                block.Draw(e,
+                    Universe.cell_size,
+                    Universe.Offset(Universe.BlockGridOffset(block.coord_id))
+                );
             });
-
-            grid_pen.Dispose();
-            cell_brush.Dispose();
         }
 
         // Calculate the next generation of cells
@@ -94,10 +122,10 @@ namespace month_6_Project_and_Portfolio_I {
             generation_gui.Text = $"Generation {Universe.generation}";
         }
 
-        public static void SetCellAtMousePosition((int x, int y) mouse_position) {
+        public static void ToggleCellAtMousePosition((int x, int y) mouse_position) {
             Universe.map.Values.ToList().ForEach((block) => {
                 if (block.Within(mouse_position, Universe.cell_size, Universe.offset)) {
-                    var clicked_cell = FindClickedCell(mouse_position);
+                    var clicked_cell = Universe.FindClickedCell(mouse_position);
 
                     block.Toggle(clicked_cell);
 
