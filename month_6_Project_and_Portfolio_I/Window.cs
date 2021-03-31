@@ -46,9 +46,6 @@ namespace month_6_Project_and_Portfolio_I
             // Setup the timer
             this.timer.Interval = 200;
             this.timer.Tick += (object s, EventArgs e) => this.Next();
-
-            // keyboard
-            this.KeyDown += this.KeyEventHandler;
         }
 
         public void Redraw() {
@@ -119,7 +116,9 @@ namespace month_6_Project_and_Portfolio_I
 
                     this.map[(0, 0)].Toggle(cell_clicked);
 
-                    this.map[(0, 0)].CountAllNeighbours();
+                    this.map[(0, 0)].ResetNeighbours();
+                    this.map[(0, 0)].CountAndSetNeighbours();
+
 
                     this.Redraw();
                 }
@@ -130,8 +129,7 @@ namespace month_6_Project_and_Portfolio_I
             this.timer.Start();
         }
 
-        private void toolStripButtonStep_Click(object sender, EventArgs e)
-        {
+        private void toolStripButtonStep_Click(object sender, EventArgs e) {
             this.Next();
             this.Redraw();
         }

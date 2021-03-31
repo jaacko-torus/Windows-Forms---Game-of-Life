@@ -15,8 +15,10 @@ namespace month_6_Project_and_Portfolio_I
         public readonly int block_size;
         public Cell[,] cells;
         
-        public List<(int x, int y)> alive_list = new List<(int x, int y)>();
+        public HashSet<(int x, int y)> alive_list = new HashSet<(int x, int y)>();
+
         private Dictionary<(int x, int y), int> inner_cells = new Dictionary<(int x, int y), int>();
+        private Dictionary<(int x, int y), int> outer_cells = new Dictionary<(int x, int y), int>();
 
         public Block(int x_position, int y_position, int block_size) {
             this.coord_id = (x_position, y_position);
@@ -88,56 +90,69 @@ namespace month_6_Project_and_Portfolio_I
 
         public delegate void ScanMatrixCallback((int x, int y) offset);
 
-        public void Scan3x3Matrix(ScanMatrixCallback callback) {
+        public static void Scan3x3Matrix((int x, int y) curr_cell, ScanMatrixCallback callback) {
             for (int x_offset = -1; x_offset <= 1; x_offset += 1) {
                 for (int y_offset = -1; y_offset <= 1; y_offset += 1) {
-                    if (x_offset == 0 && y_offset == 0) { continue; }
-
-                    callback((x_offset, y_offset));
+                    callback((curr_cell.x + x_offset, curr_cell.y + y_offset));
                 }
             }
         }
 
-        public int CountNeighbours((int x, int y) cell) {
+        public int CountCellNeighbours((int x, int y) cell) {
             int count = 0;
 
-            Scan3x3Matrix((offset) => {
-                var curr_neighbour = (cell.x + offset.x, cell.y + offset.y);
+            Block.Scan3x3Matrix(cell, (curr_neighbour) => {
+                // NOTE: below line only works because equality for Tuples works as expected
+                if (curr_neighbour == cell) { return; }
+                
+                bool is_alive_inner_cell = !IsOutsideBlock(curr_neighbour) && this.Get(curr_neighbour).IsAlive;
 
-                if (IsOutsideBlock(curr_neighbour)) {
-                    // if outside of block, fetch the right block
-                    // and get state of cell
-                    // otherwise assume dead
-                } else if (this.Get(curr_neighbour).IsAlive) {
-                    count += 1;
-                }
+                if (is_alive_inner_cell) { count += 1; }
             });
 
             return count;
         }
 
-        public void CountAllNeighbours() {
-            this.alive_list.Distinct().ToList().ForEach((alive_cell) => {
-                Scan3x3Matrix((offset) => {
-                    var neighbour = (alive_cell.x + offset.x, alive_cell.y + offset.y);
+        public void ResetNeighbours() {
+            this.alive_list.ToList().ForEach((alive_cell) => {
+                Block.Scan3x3Matrix(alive_cell, (neighbour) => {
                     this.inner_cells[neighbour] = 0;
                 });
             });
+        }
 
-            this.inner_cells.ToList().ForEach((neighbour) => {
-                if (IsOutsideBlock(neighbour.Key)) {
-                    // nothing for now
+        // CountAndSetNeighbours
+        public void CountAndSetNeighbours() {
+            this.inner_cells.Keys.ToList().ForEach((neighbour) => {
+                int neighbour_count = CountCellNeighbours(neighbour);
+
+                if (IsOutsideBlock(neighbour)) {
+                    // NOTE: I should count neighbours from cells that are outsider cells
+                    // so that I can return that data to the right cell.
+                    this.outer_cells[neighbour] = neighbour_count;
                 } else {
-                    this.inner_cells[neighbour.Key] = CountNeighbours(neighbour.Key);
-                    this.Get(neighbour.Key).neighbours = this.inner_cells[neighbour.Key];
+                    this.inner_cells[neighbour] = neighbour_count;
+                    this.Get(neighbour).neighbours = neighbour_count;
                 }
             });
         }
 
         public void Next() {
-            Console.Clear();
+            this.inner_cells.Keys.ToList().ForEach((neighbour) => {
+                if (IsOutsideBlock(neighbour)) {
+                    // nothing for now
+                } else {
+                    int neighbour_count = this.inner_cells[neighbour];
+                    bool next_state = this.Get(neighbour).StateFromNeighbours(neighbour_count);
+                    this.Get(neighbour).Set(next_state);
 
-            CountAllNeighbours();
+                    if (next_state == true) {
+                        alive_list.Add(neighbour);
+                    } else {
+                        alive_list.Remove(neighbour);
+                    }
+                }
+            });
 
             this.inner_cells.ToList().ForEach((neighbour) => {
                 if (IsOutsideBlock(neighbour.Key)) {
@@ -154,7 +169,8 @@ namespace month_6_Project_and_Portfolio_I
                 }
             });
 
-            CountAllNeighbours();
+            this.ResetNeighbours();
+            this.CountAndSetNeighbours();
         }
     }
 }
