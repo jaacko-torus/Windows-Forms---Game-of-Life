@@ -6,13 +6,10 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 // Change the namespace to your project's namespace.
-namespace month_6_Project_and_Portfolio_I
-{
-    class GraphicsPanel : Panel
-    {
+namespace month_6_Project_and_Portfolio_I {
+    class GraphicsPanel : Panel {
         // Default constructor
-        public GraphicsPanel()
-        {
+        public GraphicsPanel() {
             // Turn on double buffering.
             this.DoubleBuffered = true;
 
