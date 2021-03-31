@@ -31,6 +31,11 @@ namespace month_6_Project_and_Portfolio_I
             this.block_size = block_size;
             this.cells = new Cell[block_size, block_size];
 
+            Cell.font_string_format = new StringFormat {
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Center
+            };
+
             this.ForEach((cell) => this.cells[cell.x, cell.y] = new Cell(cell, false));
         }
 
@@ -63,22 +68,29 @@ namespace month_6_Project_and_Portfolio_I
         );
 
         public void Draw(
-            PaintEventArgs e, Brush brush, Pen pen,
+            PaintEventArgs e,
+            Dictionary<string, Color> colors,
+            Brush brush, Pen pen,
             int cell_size, (int x, int y) offset
         ) {
+            Cell.font_brush = new SolidBrush(colors["cell_text"]);
+            Cell.font = new Font("Arial", cell_size / 3f);
+
+            Cell.cell_brush = brush;
+
             this.ForEach((cell) => {
-                Rectangle cellRect = new Rectangle(
+                Rectangle cell_rectangle = new Rectangle(
                     cell.x * cell_size + offset.x,
                     cell.y * cell_size + offset.y,
                     cell_size, cell_size
                 );
 
                 // cell
-                this.Get(cell).Draw(e, brush, cellRect);
-                this.Get(cell).Write(e, brush, cellRect);
+                this.Get(cell).Draw(e, cell_rectangle);
+                this.Get(cell).Write(e, cell_rectangle);
 
                 // grid
-                e.Graphics.DrawRectangle(pen, cellRect);
+                e.Graphics.DrawRectangle(pen, cell_rectangle);
             });
         }
 

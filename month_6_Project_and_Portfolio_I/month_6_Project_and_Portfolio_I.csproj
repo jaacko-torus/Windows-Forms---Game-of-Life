@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Block.cs" />
     <Compile Include="Cell.cs" />
+    <Compile Include="Universe.cs" />
     <Compile Include="Window.cs">
       <SubType>Form</SubType>
     </Compile>

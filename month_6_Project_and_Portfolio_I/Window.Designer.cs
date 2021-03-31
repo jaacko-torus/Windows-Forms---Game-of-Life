@@ -386,7 +386,7 @@ namespace month_6_Project_and_Portfolio_I
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Window";
             this.Text = "Form1";
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.KeyEventHandler);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.keyEventHandler);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.graphicsPanelMain_MouseClick);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
