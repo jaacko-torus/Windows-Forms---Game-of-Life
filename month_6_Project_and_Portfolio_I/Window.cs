@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Numerics;
 
 namespace month_6_Project_and_Portfolio_I {
     public partial class Window : Form {
@@ -63,10 +64,10 @@ namespace month_6_Project_and_Portfolio_I {
             int speed = 10;
 
             switch (e.KeyCode) {
-                case Keys.Left:  Universe.offset.x += speed; break;
-                case Keys.Right: Universe.offset.x -= speed; break;
-                case Keys.Up:    Universe.offset.y += speed; break;
-                case Keys.Down:  Universe.offset.y -= speed; break;
+                case Keys.Left:  Universe.offset.X += speed; break;
+                case Keys.Right: Universe.offset.X -= speed; break;
+                case Keys.Up:    Universe.offset.Y += speed; break;
+                case Keys.Down:  Universe.offset.Y -= speed; break;
                 case Keys.Space: this.toggleTimer(); break;
             }
 
@@ -79,7 +80,7 @@ namespace month_6_Project_and_Portfolio_I {
 
         private void graphicsPanelMain_MouseClick(object sender, MouseEventArgs e) {
             if (e.Button == MouseButtons.Left) {
-                Universe.ToggleCellAtMousePosition((e.X, e.Y));
+                Universe.ToggleCellAtMousePosition(new Vector2(e.X, e.Y));
                 this.redraw();
             }
         }
@@ -101,6 +102,10 @@ namespace month_6_Project_and_Portfolio_I {
              */
             this.timer.Stop();
             this.redraw();
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e) {
+            this.Close();
         }
     }
 }

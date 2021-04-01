@@ -5,16 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Numerics;
 
 namespace month_6_Project_and_Portfolio_I {
     class Block {
         public static Pen grid_pen;
 
-        public readonly (int x, int y) coord_id;
+        public readonly Vector2 coord_id;
         public readonly int block_size;
 
         public Cell[,] cells;        
-        public HashSet<(int x, int y)> alive_list = new HashSet<(int x, int y)>();
+        public HashSet<Vector2> alive_list = new HashSet<Vector2>();
 
         /**
          * NOTE: inner and outer cells
@@ -22,12 +23,12 @@ namespace month_6_Project_and_Portfolio_I {
          * Inner are those within a block
          * Outer are those outside a block
          */
-        private Dictionary<(int x, int y), int> inner_cells = new Dictionary<(int x, int y), int>();
-        private Dictionary<(int x, int y), int> outer_cells = new Dictionary<(int x, int y), int>();
+        private Dictionary<Vector2, int> inner_cells = new Dictionary<Vector2, int>();
+        private Dictionary<Vector2, int> outer_cells = new Dictionary<Vector2, int>();
 
         // constructor
 
-        public Block((int x, int y) position, int block_size, Dictionary<string, Color> colors) {
+        public Block(Vector2 position, int block_size, Dictionary<string, Color> colors) {
             this.coord_id = position;
             this.block_size = block_size;
             this.cells = new Cell[block_size, block_size];
@@ -42,45 +43,43 @@ namespace month_6_Project_and_Portfolio_I {
                 LineAlignment = StringAlignment.Center
             };
 
-            this.ForEach((cell) => this.cells[cell.x, cell.y] = new Cell(cell, false));
+            this.ForEach((cell) => this.cells[(int)cell.X, (int)cell.Y] = new Cell(cell, false));
         }
 
         // methods and delegates
 
         // getters
 
-        public Cell Get((int x, int y) cell) => this.cells[cell.x, cell.y];
+        public Cell Get(Vector2 cell) => this.cells[(int)cell.X, (int)cell.Y];
 
-        public bool IsOutsideBlock((int x, int y) cell) => (
-            cell.x < 0 || this.block_size <= cell.x ||
-            cell.y < 0 || this.block_size <= cell.y
+        public bool IsOutsideBlock(Vector2 cell) => (
+            cell.X < 0 || this.block_size <= cell.X ||
+            cell.Y < 0 || this.block_size <= cell.Y
         );
 
-        public bool Within((int x, int y) mouse, int cell_size, (int x, int y) offset) {
+        public bool Within(Vector2 mouse, int cell_size, Vector2 offset) {
             int real_block_size = this.block_size * cell_size;
-            (int x, int y) grid_offset = (this.coord_id.x * real_block_size, this.coord_id.y * real_block_size);
-            (int x, int y) total_offset = (offset.x + grid_offset.x, offset.y + grid_offset.y);
+            
+            var grid_offset = this.coord_id * real_block_size;
+            var total_offset = offset + grid_offset;
 
-            (int x, int y) min = total_offset;
-            (int x, int y) max = (
-                real_block_size + total_offset.x,
-                real_block_size + total_offset.y
-            );
+            var min = total_offset;
+            var max = Vector2.One * real_block_size + total_offset;
 
             return (
-                min.x < mouse.x && mouse.x < max.x &&
-                min.y < mouse.y && mouse.y < max.y
+                min.X < mouse.X && mouse.X < max.X &&
+                min.Y < mouse.Y && mouse.Y < max.Y
             );
         }
 
-        public int CountCellNeighbours((int x, int y) cell) {
+        public int CountCellNeighbours(Vector2 cell) {
             int count = 0;
 
             Block.Scan3x3Matrix(cell, (curr_neighbour) => {
                 // NOTE: below line only works because equality for Tuples works as expected
                 if (curr_neighbour == cell) { return; }
                 
-                bool is_alive_inner_cell = !IsOutsideBlock(curr_neighbour) && this.Get(curr_neighbour).IsAlive;
+                bool is_alive_inner_cell = !this.IsOutsideBlock(curr_neighbour) && this.Get(curr_neighbour).IsAlive;
 
                 if (is_alive_inner_cell) { count += 1; }
             });
@@ -90,30 +89,30 @@ namespace month_6_Project_and_Portfolio_I {
 
         // setters
 
-        public void Set((int x, int y) cell, bool value) { this.cells[cell.x, cell.y].Set(value); }
+        public void Set(Vector2 cell, bool value) { this.cells[(int)cell.X, (int)cell.Y].Set(value); }
 
-        public void Toggle((int x, int y) cell) {
-            this.cells[cell.x, cell.y].Toggle();
+        public void Toggle(Vector2 cell) {
+            this.Get(cell).Toggle();
 
-            if (this.cells[cell.x, cell.y].IsAlive) {
+            if (this.Get(cell).IsAlive) {
                 this.alive_list.Add(cell);
             } else {
                 this.alive_list.Remove(cell);
             }
         }
 
-        public void ResetCellNeighbours((int x, int y) cell) {
+        public void ResetCellNeighbours(Vector2 cell) {
             Block.Scan3x3Matrix(cell, (neighbour) => {
                 this.inner_cells[neighbour] = 0;
             });
         }
 
-        public void CountAndSetCellNeighbours((int x, int y) cell) {
-            int neighbour_count = CountCellNeighbours(cell);
+        public void CountAndSetCellNeighbours(Vector2 cell) {
+            int neighbour_count = this.CountCellNeighbours(cell);
 
             // NOTE: I should count neighbours from cells that are outsider cells
             // so that I can return that data to the right cell.
-            if (IsOutsideBlock(cell)) {
+            if (this.IsOutsideBlock(cell)) {
                 this.outer_cells[cell] = neighbour_count;
             } else {
                 this.inner_cells[cell] = neighbour_count;
@@ -123,22 +122,22 @@ namespace month_6_Project_and_Portfolio_I {
 
         // side effects
 
-        public delegate void ForEachCallback((int x, int y) cell);
+        public delegate void ForEachCallback(Vector2 cell);
 
         public void ForEach(ForEachCallback callback) {
             for (int x = 0; x < this.cells.GetLength(0); x += 1) {
                 for (int y = 0; y < this.cells.GetLength(1); y += 1) {
-                    callback((x, y));
+                    callback(new Vector2(x, y));
                 }
             }
         }
 
-        public delegate void ScanMatrixCallback((int x, int y) offset);
+        public delegate void ScanMatrixCallback(Vector2 offset);
 
-        public static void Scan3x3Matrix((int x, int y) curr_cell, ScanMatrixCallback callback) {
+        public static void Scan3x3Matrix(Vector2 curr_cell, ScanMatrixCallback callback) {
             for (int x_offset = -1; x_offset <= 1; x_offset += 1) {
                 for (int y_offset = -1; y_offset <= 1; y_offset += 1) {
-                    callback((curr_cell.x + x_offset, curr_cell.y + y_offset));
+                    callback(curr_cell + new Vector2(x_offset, y_offset));
                 }
             }
         }
@@ -149,6 +148,14 @@ namespace month_6_Project_and_Portfolio_I {
             });
         }
 
+        public void Reset() {
+            this.ResetNeighbours();
+
+            this.alive_list.Clear();
+            this.inner_cells.Clear();
+            this.outer_cells.Clear();
+        }
+
         public void CountAndSetNeighbours() {
             this.inner_cells.Keys.ToList().ForEach((neighbour) => {
                 this.CountAndSetCellNeighbours(neighbour);
@@ -157,12 +164,14 @@ namespace month_6_Project_and_Portfolio_I {
 
         public void Draw(
             PaintEventArgs e,
-            int cell_size, (int x, int y) offset
+            int cell_size, Vector2 offset
         ) {
             this.ForEach((cell) => {
-                Rectangle cell_rectangle = new Rectangle(
-                    cell.x * cell_size + offset.x,
-                    cell.y * cell_size + offset.y,
+                var position = cell * cell_size + offset;
+
+                var cell_rectangle = new Rectangle(
+                    (int)position.X,
+                    (int)position.Y,
                     cell_size, cell_size
                 );
 
@@ -177,7 +186,7 @@ namespace month_6_Project_and_Portfolio_I {
 
         public void Next() {
             this.inner_cells.Keys.ToList().ForEach((neighbour) => {
-                if (IsOutsideBlock(neighbour)) {
+                if (this.IsOutsideBlock(neighbour)) {
                     // nothing for now
                 } else {
                     int neighbour_count = this.inner_cells[neighbour];

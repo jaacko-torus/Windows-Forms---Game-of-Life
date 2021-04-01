@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Numerics;
 
 namespace month_6_Project_and_Portfolio_I {
     class Cell {
@@ -17,7 +18,7 @@ namespace month_6_Project_and_Portfolio_I {
         public static Brush cell_brush;
 
         // getters
-        public (int x, int y) Values { get => this.cell; }
+        public Vector2 Value { get => this.cell; }
         public bool IsAlive { get => this.state; }
 
         // properties
@@ -26,13 +27,13 @@ namespace month_6_Project_and_Portfolio_I {
         // private
 
         // readonly
-        private readonly (int x, int y) cell;
+        private readonly Vector2 cell;
 
         // properties
         private bool state;
 
         // constructor
-        public Cell((int x, int y) cell, bool state) {
+        public Cell(Vector2 cell, bool state) {
             this.state = state;
             this.cell = cell;
         }
