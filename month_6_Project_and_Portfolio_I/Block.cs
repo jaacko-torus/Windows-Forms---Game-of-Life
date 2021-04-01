@@ -57,14 +57,12 @@ namespace month_6_Project_and_Portfolio_I {
             cell.Y < 0 || this.block_size <= cell.Y
         );
 
-        public bool Within(Vector2 mouse, int cell_size, Vector2 offset) {
-            int real_block_size = this.block_size * cell_size;
-            
+        public bool Within(Vector2 mouse, int real_block_size, Vector2 offset) {
             var grid_offset = this.coord_id * real_block_size;
             var total_offset = offset + grid_offset;
 
             var min = total_offset;
-            var max = Vector2.One * real_block_size + total_offset;
+            var max = new Vector2(real_block_size) + total_offset;
 
             return (
                 min.X < mouse.X && mouse.X < max.X &&
@@ -89,7 +87,9 @@ namespace month_6_Project_and_Portfolio_I {
 
         // setters
 
-        public void Set(Vector2 cell, bool value) { this.cells[(int)cell.X, (int)cell.Y].Set(value); }
+        public void Set(Vector2 cell, bool value) {
+            this.cells[(int)cell.X, (int)cell.Y].Set(value);
+        }
 
         public void Toggle(Vector2 cell) {
             this.Get(cell).Toggle();
@@ -143,9 +143,7 @@ namespace month_6_Project_and_Portfolio_I {
         }
 
         public void ResetNeighbours() {
-            this.alive_list.ToList().ForEach((alive_cell) => {
-                this.ResetCellNeighbours(alive_cell);
-            });
+            this.alive_list.ToList().ForEach(this.ResetCellNeighbours);
         }
 
         public void Reset() {
@@ -157,9 +155,7 @@ namespace month_6_Project_and_Portfolio_I {
         }
 
         public void CountAndSetNeighbours() {
-            this.inner_cells.Keys.ToList().ForEach((neighbour) => {
-                this.CountAndSetCellNeighbours(neighbour);
-            });
+            this.inner_cells.Keys.ToList().ForEach(this.CountAndSetCellNeighbours);
         }
 
         public void Draw(

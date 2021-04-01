@@ -41,10 +41,10 @@ namespace month_6_Project_and_Portfolio_I {
 
         // getters
 
-        public static int block_real_size { get => Universe.cell_size * Universe.block_size; }
+        public static int real_block_size { get => Universe.cell_size * Universe.block_size; }
 
         public static Vector2 center {
-            get => Universe.offset - new Vector2(Universe.cell_size * Universe.block_size) / 2;
+            get => Universe.offset - new Vector2(Universe.real_block_size) / 2;
         }
 
         // private
@@ -68,49 +68,37 @@ namespace month_6_Project_and_Portfolio_I {
 
         // getters
 
-        // TODO: `Floor` should be in a helper file
-        public static Vector2 Floor(Vector2 v) => new Vector2((float)Math.Floor(v.X), (float)Math.Floor(v.Y));
-
-        // https://en.wikipedia.org/wiki/Modulo_operation
-        // `mod1` should be same as `a % b`
-        public static Vector2 mod1(Vector2 a, Vector2 b) => a - b * (a / b);
-        public static Vector2 mod2(Vector2 a, Vector2 b) => a - b * Universe.Floor(a / b);
-        public static Vector2 mod3(Vector2 a, Vector2 b) => a - Vector2.Abs(b) * Universe.Floor(a / Vector2.Abs(b));
-
-        public static Vector2 mod1(Vector2 a, int b) => a - b * (a / b);
-        public static Vector2 mod2(Vector2 a, int b) => a - b * Universe.Floor(a / b);
-        public static Vector2 mod3(Vector2 a, int b) => a - new Vector2(Math.Abs(b)) * Universe.Floor(a / Math.Abs(b));
-
-        public static Vector2 client_size(GraphicsPanel graphics_panel) =>
+        public static Vector2 ClientSize(GraphicsPanel graphics_panel) =>
             new Vector2(graphics_panel.ClientSize.Width, graphics_panel.ClientSize.Height);
 
-        public static int DefaultCellSize(GraphicsPanel graphics_panel) => Math.Min(
-            graphics_panel.ClientSize.Width / Universe.block_size,
-            graphics_panel.ClientSize.Height / Universe.block_size
-        );
+        public static int DefaultCellSize(GraphicsPanel graphics_panel) => (int)Math.Min(
+            Universe.ClientSize(graphics_panel).X,
+            Universe.ClientSize(graphics_panel).Y
+        ) / Universe.block_size;
 
         public static Vector2 DefaultOffset(GraphicsPanel graphics_panel) =>
-            (Universe.client_size(graphics_panel) - new Vector2(Universe.cell_size * Universe.block_size)) / 2;
+            (Universe.ClientSize(graphics_panel) - new Vector2(Universe.real_block_size)) / 2;
+
+        private static Vector2 FindClickedBlock(Vector2 mouse) => UVector2.Floor(
+            (mouse - Universe.offset) / Universe.real_block_size
+        );
 
         // TODO: not sure if I should be using `mod2` or `mod3` here.
-        private static Vector2 FindClickedCell(Vector2 mouse) =>
-            mod3(mouse - Universe.offset, Universe.block_real_size) / Universe.cell_size;
-
-        private static Vector2 Offset(Vector2 position) => position + Universe.offset;
-
-        private static Vector2 BlockGridOffset(Vector2 block) => block * Universe.block_size * Universe.cell_size;
+        private static Vector2 FindClickedCell(Vector2 mouse) => UVector2.Floor(
+            UVector2.mod3(mouse - Universe.offset, Universe.real_block_size) / Universe.cell_size
+        );
 
         // side_effects
 
         public static void Draw(PaintEventArgs e) {
             Universe.map.Values.ToList().ForEach((block) => {
-                var offset = Universe.Offset(Universe.BlockGridOffset(block.coord_id));
-                block.Draw(e, Universe.cell_size, offset);
+                block.Draw(e, Universe.cell_size, block.coord_id * Universe.real_block_size + Universe.offset);
             });
         }
 
         // Calculate the next generation of cells
         public static void Next(ToolStripStatusLabel generation_gui) {
+            // advance every block
             Universe.map.Values.ToList().ForEach((block) => block.Next());
 
             Universe.generation += 1;
@@ -126,23 +114,23 @@ namespace month_6_Project_and_Portfolio_I {
         }
 
         public static void ToggleCellAtMousePosition(Vector2 mouse_position) {
-            Universe.map.Values.ToList().ForEach((block) => {
-                if (block.Within(mouse_position, Universe.cell_size, offset)) {
-                    var clicked_cell = Universe.FindClickedCell(mouse_position);
+            var block = Universe.FindClickedBlock(mouse_position);
+            var cell = Universe.FindClickedCell(mouse_position);
 
-                    block.Toggle(clicked_cell);
+            /**
+              * NOTE: When recounting neighbours, I can't use `CountAndSetCellNeighbours`
+              * since it's a wrapper for `cell.neighbours = <int>` with error correction.
+              * Instead I need to find neighbours myself by matrix scanning.
+              */
 
-                    block.ResetCellNeighbours(clicked_cell);
-
-                    /**
-                     * NOTE: can't use `CountAndSetCellNeighbours` since it's a wrapper for
-                     * `cell.neighbours = <int>` with error correction.
-                     * Instead I need to find neighbours myself by matrix scanning myself.
-                     */
-                    Block.Scan3x3Matrix(clicked_cell, (clicked_cell_neighbour) =>
-                        block.CountAndSetCellNeighbours(clicked_cell_neighbour));
-                }
-            });
+            if (Universe.map.ContainsKey(block)) {
+                // toggle
+                Universe.map[block].Toggle(cell);
+                // reset neighbours
+                Universe.map[block].ResetCellNeighbours(cell);
+                // recount neighbours
+                Block.Scan3x3Matrix(cell, Universe.map[block].CountAndSetCellNeighbours);
+            };
         }
     }
 }
