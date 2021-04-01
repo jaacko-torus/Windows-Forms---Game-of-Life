@@ -50,7 +50,9 @@ namespace month_6_Project_and_Portfolio_I {
 
         // getters
 
-        public bool StateFromNeighbours(int neighbour_count) => this.IsAlive
+
+
+        public bool NextState(int neighbour_count) => this.IsAlive
             ? neighbour_count == 2 || neighbour_count == 3
             : neighbour_count == 3;
 

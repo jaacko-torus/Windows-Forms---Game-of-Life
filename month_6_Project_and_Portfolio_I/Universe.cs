@@ -59,7 +59,7 @@ namespace month_6_Project_and_Portfolio_I {
             Universe.cell_size = Universe.DefaultCellSize(graphics_panel);
             Universe.offset = Universe.DefaultOffset(graphics_panel);
 
-            Block.Scan3x3Matrix(new Vector2(0, 0), (block_coords) => {
+            UMatrix.ForEach3x3Matrix(new Vector2(0, 0), (block_coords) => {
                 Universe.map.Add(block_coords, new Block(block_coords, Universe.block_size, Universe.colors));
             });
         }
@@ -99,7 +99,7 @@ namespace month_6_Project_and_Portfolio_I {
         // Calculate the next generation of cells
         public static void Next(ToolStripStatusLabel generation_gui) {
             // advance every block
-            Universe.map.Values.ToList().ForEach((block) => block.Next());
+            Universe.map.Values.ToList().ForEach(block => block.Next());
 
             Universe.generation += 1;
 
@@ -108,7 +108,7 @@ namespace month_6_Project_and_Portfolio_I {
         }
 
         public static void Reset() {
-            Universe.map.Keys.ToList().ForEach((block) => Universe.map[block].Reset());
+            Universe.map.Keys.ToList().ForEach(block => Universe.map[block].Reset());
 
             // TODO: this resets all blocks but does not remove any unneeded blocks.
         }
@@ -129,7 +129,7 @@ namespace month_6_Project_and_Portfolio_I {
                 // reset neighbours
                 Universe.map[block].ResetCellNeighbours(cell);
                 // recount neighbours
-                Block.Scan3x3Matrix(cell, Universe.map[block].CountAndSetCellNeighbours);
+                UMatrix.ForEach3x3Matrix(cell, Universe.map[block].CountAndSetCellNeighbours);
             };
         }
     }

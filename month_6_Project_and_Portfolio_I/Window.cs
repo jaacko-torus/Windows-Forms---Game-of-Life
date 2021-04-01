@@ -36,9 +36,7 @@ namespace month_6_Project_and_Portfolio_I {
 
         // helpers
 
-        public void redraw() {
-            this.graphicsPanelMain.Invalidate();
-        }
+        public void redraw() => this.graphicsPanelMain.Invalidate();
 
         public void toggleTimer() {
             if (this.timer.Enabled) {
@@ -48,7 +46,7 @@ namespace month_6_Project_and_Portfolio_I {
             }
         }
 
-        private bool isInScreen(int x, int y) {
+        private bool isWithinScreen(int x, int y) {
             int max_x = this.graphicsPanelMain.ClientSize.Width;
             int max_y = this.graphicsPanelMain.ClientSize.Height;
 
@@ -95,11 +93,6 @@ namespace month_6_Project_and_Portfolio_I {
         }
 
         private void toolStripButtonStop_Click(object sender, EventArgs e) {
-            /**
-             * NOTE: this should never mess with the internal logic since
-             * `timer.Tick` only calls `this.Next` and there are no threads,
-             * so I can feel safe only stopping the timer.
-             */
             this.timer.Stop();
             this.redraw();
         }

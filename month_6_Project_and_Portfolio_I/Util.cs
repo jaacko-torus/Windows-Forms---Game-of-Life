@@ -20,4 +20,43 @@ namespace month_6_Project_and_Portfolio_I {
         public static Vector2 mod2(Vector2 a, int b) => a - b * UVector2.Floor(a / b);
         public static Vector2 mod3(Vector2 a, int b) => a - new Vector2(Math.Abs(b)) * UVector2.Floor(a / Math.Abs(b));
     }
+
+    public static class UIEnumerable {
+        public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> enumerable) =>
+            enumerable.ToDictionary(pair => pair.Key, pair => pair.Value);
+    }
+
+    public static class UMatrix {
+        public delegate void ForEachMatrixCallback(Vector2 curr_cell);
+
+        public static void ForEach3x3Matrix(Vector2 curr_cell, ForEachMatrixCallback callback) {
+            for (int x_offset = -1; x_offset <= 1; x_offset += 1) {
+                for (int y_offset = -1; y_offset <= 1; y_offset += 1) {
+                    callback(curr_cell + new Vector2(x_offset, y_offset));
+                }
+            }
+        }
+
+
+
+        public delegate T ReduceMatrixCallback<T>(T prev_cell, Vector2 curr_cell);
+
+        public static T Reduce3x3Matrix<T>(Vector2 curr_cell, ReduceMatrixCallback<T> callback, T initial) {
+            T result = initial;
+
+            UMatrix.ForEach3x3Matrix(curr_cell, curr_neighbour => {
+                result = callback(result, curr_neighbour);
+            });
+
+            return result;
+        }
+
+        public static Vector2 Reduce3x3Matrix(Vector2 curr_cell, ReduceMatrixCallback<Vector2> callback) {
+            return UMatrix.Reduce3x3Matrix<Vector2>(
+                curr_cell,
+                (prev, curr) => curr_cell == curr ? prev : callback(prev, curr),
+                curr_cell
+            );
+        }
+    }
 }
