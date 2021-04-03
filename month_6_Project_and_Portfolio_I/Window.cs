@@ -22,13 +22,13 @@ namespace month_6_Project_and_Portfolio_I {
         public Window() {
             this.InitializeComponent();
 
-            Universe.Start(this.graphicsPanelMain);
+            _Universe.Start(this.graphicsPanelMain);
 
             // Setup the timer
             this.timer.Interval = 200;
             this.timer.Tick += (object s, EventArgs e) => {
                 // update universe
-                Universe.Next(toolStripStatusLabelGenerations);
+                _Universe.Next(toolStripStatusLabelGenerations);
                 // redraw
                 this.redraw();
             };
@@ -62,10 +62,10 @@ namespace month_6_Project_and_Portfolio_I {
             int speed = 10;
 
             switch (e.KeyCode) {
-                case Keys.Left:  Universe.offset.X += speed; break;
-                case Keys.Right: Universe.offset.X -= speed; break;
-                case Keys.Up:    Universe.offset.Y += speed; break;
-                case Keys.Down:  Universe.offset.Y -= speed; break;
+                case Keys.Left:  _Universe.offset.X += speed; break;
+                case Keys.Right: _Universe.offset.X -= speed; break;
+                case Keys.Up:    _Universe.offset.Y += speed; break;
+                case Keys.Down:  _Universe.offset.Y -= speed; break;
                 case Keys.Space: this.toggleTimer(); break;
             }
 
@@ -73,12 +73,12 @@ namespace month_6_Project_and_Portfolio_I {
         }
 
         private void graphicsPanelMain_Paint(object sender, PaintEventArgs e) {
-            Universe.Draw(e);
+            _Universe.Draw(e);
         }
 
         private void graphicsPanelMain_MouseClick(object sender, MouseEventArgs e) {
             if (e.Button == MouseButtons.Left) {
-                Universe.ToggleCellAtMousePosition(new Vector2(e.X, e.Y));
+                _Universe.ToggleCellAtMousePosition(new Vector2(e.X, e.Y));
                 this.redraw();
             }
         }
@@ -88,7 +88,7 @@ namespace month_6_Project_and_Portfolio_I {
         }
 
         private void toolStripButtonStep_Click(object sender, EventArgs e) {
-            Universe.Next(toolStripStatusLabelGenerations);
+            _Universe.Next(toolStripStatusLabelGenerations);
             this.redraw();
         }
 

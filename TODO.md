@@ -1,7 +1,7 @@
 # TODO
 
-- [ ] add multiple blocks to universe
-  - [ ] make them interact with each other
+- [x] draw grid with lines instead of with squares
+- [ ] migrate block system to alive list system
 - [ ] new button should reset universe
   - [ ] add `window.Reset`
 - [ ] randomize functions

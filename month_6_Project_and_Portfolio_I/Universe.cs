@@ -22,6 +22,8 @@ namespace month_6_Project_and_Portfolio_I {
 
         public static int generation = 0;
 
+        public static Dictionary<Vector2, Cell> _map = new Dictionary<Vector2, Cell>();
+
         public static Dictionary<Vector2, Block> map {
             get;
             private set;

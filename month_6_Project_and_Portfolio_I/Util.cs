@@ -4,8 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Numerics;
+using System.Drawing;
 
 namespace month_6_Project_and_Portfolio_I {
+    public static class UFloat {
+        // https://en.wikipedia.org/wiki/Modulo_operation
+        // `mod1` should be same as `a % b`
+        public static float mod1(float a, float b) => a - b * (a / b);
+        public static float mod2(float a, float b) => a - b * (float)Math.Floor(a / b);
+        public static float mod3(float a, float b) => a - (float)Math.Abs(b) * (float)Math.Floor(a / (float)Math.Abs(b));
+    }
+
     public static class UVector2 {
         // TODO: `Floor` should be in a helper file
         public static Vector2 Floor(Vector2 v) => new Vector2((float)Math.Floor(v.X), (float)Math.Floor(v.Y));
@@ -19,11 +28,25 @@ namespace month_6_Project_and_Portfolio_I {
         public static Vector2 mod1(Vector2 a, int b) => a - b * (a / b);
         public static Vector2 mod2(Vector2 a, int b) => a - b * UVector2.Floor(a / b);
         public static Vector2 mod3(Vector2 a, int b) => a - new Vector2(Math.Abs(b)) * UVector2.Floor(a / Math.Abs(b));
+
+        public static PointF ToPointF(this Vector2 point) => new PointF(point.X, point.Y);
     }
 
     public static class UIEnumerable {
         public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> enumerable) =>
             enumerable.ToDictionary(pair => pair.Key, pair => pair.Value);
+    }
+
+    public static class UDictionary {
+        public static void ForEach<K, V>(this Dictionary<K, V> dictionary, Action<K> callback) =>
+            dictionary.Keys.ToList().ForEach(key => callback(key));
+
+        public static void ForEach<K, V>(this Dictionary<K, V> dictionary, Action<K, V> callback) =>
+            dictionary.ToList().ForEach(pair => callback(pair.Key, pair.Value));
+    }
+
+    public static class UPoint {
+        public static Vector2 ToVector2(this Point point) => new Vector2(point.X, point.Y);
     }
 
     public static class UMatrix {

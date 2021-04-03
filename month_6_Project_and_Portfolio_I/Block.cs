@@ -15,6 +15,7 @@ namespace month_6_Project_and_Portfolio_I {
         public readonly int block_size;
 
         public Cell[,] cells;
+
         public HashSet<Vector2> alive_list = new HashSet<Vector2>();
 
         /**
@@ -52,7 +53,7 @@ namespace month_6_Project_and_Portfolio_I {
 
         public Cell Get(Vector2 cell) => this.cells[(int)cell.X, (int)cell.Y];
 
-        public bool IsInsideBlock(Vector2 cell) => (
+        public bool Bounding(Vector2 cell) => (
             0 <= cell.X && cell.X < this.block_size &&
             0 <= cell.Y && cell.Y < this.block_size
         );
@@ -71,10 +72,6 @@ namespace month_6_Project_and_Portfolio_I {
         }
 
 
-
-        public void Set(Vector2 cell, bool value) {
-            this.cells[(int)cell.X, (int)cell.Y].Set(value);
-        }
 
         public void Toggle(Vector2 cell) {
             this.Get(cell).Toggle();
@@ -105,7 +102,7 @@ namespace month_6_Project_and_Portfolio_I {
             // NOTE: using `return` for clarity
             return UMatrix.Reduce3x3Matrix(cell, (total, curr_neighbour) => {
                 // Don't count if self, not in block, or dead. Short circuiting works as early return.
-                return curr_neighbour == cell || !this.IsInsideBlock(curr_neighbour) || !this.Get(curr_neighbour).IsAlive
+                return curr_neighbour == cell || !this.Bounding(curr_neighbour) || !this.Get(curr_neighbour).IsAlive
                     ? total
                     : total + 1;
             }, 0);
@@ -116,7 +113,7 @@ namespace month_6_Project_and_Portfolio_I {
 
             // NOTE: I should count neighbours from cells that are outsider cells
             // so that I can return that data to the right cell.
-            if (this.IsInsideBlock(cell)) {
+            if (this.Bounding(cell)) {
                 this.inner_cells[cell] = neighbour_count;
                 this.Get(cell).neighbours = neighbour_count;
             } else {
@@ -167,8 +164,8 @@ namespace month_6_Project_and_Portfolio_I {
 
 
         public void SetNextState(Dictionary<Vector2, int> cells_to_be_set) {
-            cells_to_be_set.Keys.ToList().ForEach((neighbour) => {
-                if (this.IsInsideBlock(neighbour)) {
+            cells_to_be_set.ForEach((neighbour) => {
+                if (this.Bounding(neighbour)) {
                     bool next_state = this.Get(neighbour).NextState(cells_to_be_set[neighbour]);
 
                     this.Get(neighbour).Set(next_state);
