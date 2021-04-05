@@ -25,17 +25,17 @@ namespace month_6_Project_and_Portfolio_I {
 
         private bool state;
 
+        public bool next_state => this.is_alive
+            ? this.neighbors == 2 || this.neighbors == 3
+            : this.neighbors == 3;
+
         public Cell(bool state) {
             this.state = state;
         }
 
-        public void Set(bool value) => this.state = value;
-        
         public void Toggle() => this.state = !this.state;
-
-        public bool next_state => this.is_alive
-            ? this.neighbors == 2 || this.neighbors == 3
-            : this.neighbors == 3;
+        public void Set(bool value) => this.state = value;
+        public void Next() => this.state = this.next_state;
         
         public void Paint(PaintEventArgs e, RectangleF rectangle) {
             if (this.is_alive) {

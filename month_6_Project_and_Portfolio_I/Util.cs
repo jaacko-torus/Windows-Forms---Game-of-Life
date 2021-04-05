@@ -12,15 +12,12 @@ namespace month_6_Project_and_Portfolio_I {
         // `mod1` should be same as `a % b`
         public static float mod1(float a, float b) => a - b * (a / b);
         public static float mod2(float a, float b) => a - b * (float)Math.Floor(a / b);
-        public static float mod3(float a, float b) => a - (float)Math.Abs(b) * (float)Math.Floor(a / (float)Math.Abs(b));
+        public static float mod3(float a, float b) => a - (float)Math.Abs(b) * (float)Math.Floor(a / Math.Abs(b));
     }
 
     public static class UVector2 {
-        // TODO: `Floor` should be in a helper file
         public static Vector2 Floor(Vector2 v) => new Vector2((float)Math.Floor(v.X), (float)Math.Floor(v.Y));
 
-        // https://en.wikipedia.org/wiki/Modulo_operation
-        // `mod1` should be same as `a % b`
         public static Vector2 mod1(Vector2 a, Vector2 b) => a - b * (a / b);
         public static Vector2 mod2(Vector2 a, Vector2 b) => a - b * UVector2.Floor(a / b);
         public static Vector2 mod3(Vector2 a, Vector2 b) => a - Vector2.Abs(b) * UVector2.Floor(a / Vector2.Abs(b));
