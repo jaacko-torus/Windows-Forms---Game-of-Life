@@ -25,7 +25,6 @@ namespace month_6_Project_and_Portfolio_I {
         // constructor
 
         public Window() {
-
             this.InitializeComponent();
 
             Universe.Start(this.graphicsPanelMain);
@@ -34,15 +33,20 @@ namespace month_6_Project_and_Portfolio_I {
             this.nextGenTimer.Interval = 200;
             this.nextGenTimer.Tick += (object s, EventArgs e) => {
                 // update universe
-                Universe.Next(toolStripStatusLabelGenerations);
+                Universe.Next(this.toolStripStatusLabelGenerations);
                 // redraw
                 this.redraw();
             };
 
             this.inputTimer.Interval = 1000 / 30;
-            //EventHandler
             this.inputTimer.Tick += this.handleInput;
             this.inputTimer.Start();
+        }
+
+        private void reset() {
+
+            Universe.Start(this.graphicsPanelMain);
+            this.nextGenTimer.Start();
         }
 
         // helpers
@@ -55,16 +59,6 @@ namespace month_6_Project_and_Portfolio_I {
             } else {
                 this.nextGenTimer.Start();
             }
-        }
-
-        private bool isWithinScreen(int x, int y) {
-            int max_x = this.graphicsPanelMain.ClientSize.Width;
-            int max_y = this.graphicsPanelMain.ClientSize.Height;
-
-            return (
-                0 < x && x < max_x &&
-                0 < y && y < max_y
-            );
         }
 
         // window events
@@ -81,8 +75,11 @@ namespace month_6_Project_and_Portfolio_I {
                 Universe.offset += movement;
             }
 
-            if (this.input["space"]) {
-                this.toggleTimer();
+            if (this.input["resize"]) {
+                // idk how to resize :(
+
+                // TODO: make sure center 
+                // Universe.offset = Universe.ToClientPosition(Universe.DefaultOffset());
             }
 
             if (this.input.Values.Contains(true)) {
@@ -92,11 +89,12 @@ namespace month_6_Project_and_Portfolio_I {
         }
 
         private Dictionary<string, bool> input = new Dictionary<string, bool>() {
-            { "left",  false },
-            { "right", false },
-            { "up",    false },
-            { "down",  false },
-            { "space", false }
+            { "left",   false },
+            { "right",  false },
+            { "up",     false },
+            { "down",   false },
+
+            { "resize", false }
         };
 
         private Dictionary<string, Keys[]> key_map = new Dictionary<string, Keys[]>() {
@@ -104,15 +102,20 @@ namespace month_6_Project_and_Portfolio_I {
             { "right", new Keys[] { Keys.D, Keys.Right } },
             { "up",    new Keys[] { Keys.W, Keys.Up } },
             { "down",  new Keys[] { Keys.S, Keys.Down } },
-            { "space", new Keys[] { Keys.Space } }
+
+            { "pause", new Keys[] { Keys.Space } }
         };
 
         private void keyDown(object sender, KeyEventArgs e) {
             this.key_map.ForEach((name, keys) => {
-                if (keys.Contains(e.KeyCode)) {
+                if (keys.Contains(e.KeyCode) && this.input.ContainsKey(name)) {
                     this.input[name] = true;
                 }
             });
+
+            if (this.key_map["pause"].Contains(e.KeyCode)) {
+                this.toggleTimer();
+            }
         }
 
         private void keyUp(object sender, KeyEventArgs e) {
@@ -148,8 +151,20 @@ namespace month_6_Project_and_Portfolio_I {
             this.redraw();
         }
 
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e) {
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e) =>
             this.Close();
+
+        private void toolStripButtonReset_Click(object sender, EventArgs e) {
+            this.reset();
+            Universe.Reset(this.toolStripStatusLabelGenerations);
+            this.nextGenTimer.Stop();
+            this.redraw();
         }
+
+        private void Window_ResizeBegin(object sender, EventArgs e) =>
+            this.input["resize"] = true;
+
+        private void Window_ResizeEnd(object sender, EventArgs e) =>
+            this.input["resize"] = false;
     }
 }

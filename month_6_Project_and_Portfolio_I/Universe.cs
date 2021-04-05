@@ -11,11 +11,11 @@ namespace month_6_Project_and_Portfolio_I {
     static class Universe {
         private static GraphicsPanel graphics_panel;
 
-        private static Vector2 client_size =>
+        public static Vector2 client_size =>
             new Vector2(Universe.graphics_panel.ClientSize.Width, Universe.graphics_panel.ClientSize.Height);
 
         private static float zoom = 10;
-        
+
         private static float _cell_size;
         private static float cell_size {
             get => Universe._cell_size;
@@ -23,7 +23,7 @@ namespace month_6_Project_and_Portfolio_I {
                 Universe._cell_size = value;
                 Cell.font = new Font("Arial", Universe._cell_size / 3f);
             }
-        
+
         }
 
         public static Vector2 offset;
@@ -47,12 +47,18 @@ namespace month_6_Project_and_Portfolio_I {
             { "cell_text",           Color.FromArgb(0xEC, 0xEF, 0xF4) }
         };
 
+        public static Vector2 ToWorldPosition(Vector2 v) =>
+            v - Universe.offset;
+
+        public static Vector2 ToClientPosition(Vector2 v) =>
+            v + Universe.offset;
+
         public static void Start(GraphicsPanel graphics_panel) {
             Universe.graphics_panel = graphics_panel;
 
-            Universe.cell_size = Universe.DefaultCellSize(graphics_panel);
+            Universe.cell_size = Universe.DefaultCellSize();
 
-            Universe.offset = Universe.DefaultOffset(graphics_panel);
+            Universe.offset = Universe.DefaultOffset();
 
             Cell.font_brush = new SolidBrush(Universe.colors["cell_text"]);
             Cell.cell_brush = new SolidBrush(Universe.colors["cell"]);
@@ -61,14 +67,16 @@ namespace month_6_Project_and_Portfolio_I {
                 Alignment = StringAlignment.Center,
                 LineAlignment = StringAlignment.Center
             };
+
+            Universe.generation = 0;
         }
 
         // default values
 
-        private static float DefaultCellSize(GraphicsPanel graphics_panel) =>
+        private static float DefaultCellSize() =>
             Math.Min(Universe.client_size.X, Universe.client_size.Y) / Universe.zoom;
 
-        private static Vector2 DefaultOffset(GraphicsPanel graphics_panel) => Universe.client_size / 2;
+        public static Vector2 DefaultOffset() => Universe.client_size / 2;
 
 
         // cell actions
@@ -195,9 +203,11 @@ namespace month_6_Project_and_Portfolio_I {
         // window interface
 
 
-        public static void Reset() {
+        public static void Reset(ToolStripStatusLabel generation_gui) {
             Universe.map.Clear();
             Universe.alive.Clear();
+            Universe.generation = 0;
+            generation_gui.Text = $"Generation {Universe.generation}";
         }
 
         public static void Next(ToolStripStatusLabel generation_gui) {
@@ -217,6 +227,7 @@ namespace month_6_Project_and_Portfolio_I {
                 Universe.map[cell].Paint(e, new RectangleF(
                     (cell * Universe.cell_size + Universe.offset).ToPointF(),
                     new Vector2(Universe.cell_size).ToSizeF()
+
                 ));
             });
 
