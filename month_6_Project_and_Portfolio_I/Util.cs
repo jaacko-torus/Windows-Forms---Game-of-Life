@@ -16,6 +16,13 @@ namespace month_6_Project_and_Portfolio_I {
     }
 
     public static class UVector2 {
+        public static Vector2 Left  => new Vector2(-1,  0);
+        public static Vector2 Right => new Vector2( 1,  0);
+        public static Vector2 Up    => new Vector2( 0,  1);
+        public static Vector2 Down  => new Vector2( 0, -1);
+
+        public static Vector2 Normalized(Vector2 v) => v == Vector2.Zero ? v : Vector2.Normalize(v);
+
         public static Vector2 Floor(Vector2 v) => new Vector2((float)Math.Floor(v.X), (float)Math.Floor(v.Y));
 
         public static Vector2 mod1(Vector2 a, Vector2 b) => a - b * (a / b);

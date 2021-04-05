@@ -14,10 +14,10 @@ namespace month_6_Project_and_Portfolio_I {
         private static Vector2 client_size =>
             new Vector2(Universe.graphics_panel.ClientSize.Width, Universe.graphics_panel.ClientSize.Height);
 
-        public static float zoom = 10;
+        private static float zoom = 10;
         
         private static float _cell_size;
-        public static float cell_size {
+        private static float cell_size {
             get => Universe._cell_size;
             set {
                 Universe._cell_size = value;
@@ -25,12 +25,15 @@ namespace month_6_Project_and_Portfolio_I {
             }
         
         }
+
         public static Vector2 offset;
 
         public static int generation = 0;
 
-        public static HashSet<Vector2> alive = new HashSet<Vector2>();
-        public static Dictionary<Vector2, Cell> map = new Dictionary<Vector2, Cell>();
+        // only alive cells
+        private static HashSet<Vector2> alive = new HashSet<Vector2>();
+        // all cells that need to be kept track of, alive + alive neighbors
+        private static Dictionary<Vector2, Cell> map = new Dictionary<Vector2, Cell>();
 
         // Drawing colors, Pallette https://www.nordtheme.com/docs/colors-and-palettes
         public static Dictionary<string, Color> colors = new Dictionary<string, Color>() {
