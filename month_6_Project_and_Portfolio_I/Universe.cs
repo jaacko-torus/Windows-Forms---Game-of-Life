@@ -9,25 +9,25 @@ using System.Numerics;
 
 namespace month_6_Project_and_Portfolio_I {
     static class Universe {
-        public static int block_size;
+        public static GraphicsPanel graphics_panel;
 
-        public static int cell_size {
+        public static float zoom = 10;
+        
+        private static float _cell_size;
+        public static float cell_size {
             get => Universe._cell_size;
             set {
                 Universe._cell_size = value;
-                Cell.font = new Font("Arial", Universe.cell_size / 3f);
+                Cell.font = new Font("Arial", Universe._cell_size / 3f);
             }
+        
         }
         public static Vector2 offset;
 
         public static int generation = 0;
 
-        public static Dictionary<Vector2, Cell> _map = new Dictionary<Vector2, Cell>();
-
-        public static Dictionary<Vector2, Block> map {
-            get;
-            private set;
-        } = new Dictionary<Vector2, Block>();
+        public static HashSet<Vector2> alive = new HashSet<Vector2>();
+        public static Dictionary<Vector2, Cell> map = new Dictionary<Vector2, Cell>();
 
         // Drawing colors, Pallette https://www.nordtheme.com/docs/colors-and-palettes
         public static Dictionary<string, Color> colors = new Dictionary<string, Color>() {
@@ -41,67 +41,125 @@ namespace month_6_Project_and_Portfolio_I {
             { "cell_text",           Color.FromArgb(0xEC, 0xEF, 0xF4) }
         };
 
-        // getters
-
-        public static int real_block_size { get => Universe.cell_size * Universe.block_size; }
-
-        public static Vector2 center {
-            get => Universe.offset - new Vector2(Universe.real_block_size) / 2;
-        }
-
-        // private
-
-        private static int _cell_size;
-
-        // Initializer
-
         public static void Start(GraphicsPanel graphics_panel) {
-            Universe.block_size = 10;
+            Universe.graphics_panel = graphics_panel;
 
             Universe.cell_size = Universe.DefaultCellSize(graphics_panel);
-            Universe.offset = Universe.DefaultOffset(graphics_panel);
 
-            UMatrix.ForEach3x3Matrix(new Vector2(0, 0), (block_coords) => {
-                Universe.map.Add(block_coords, new Block(block_coords, Universe.block_size, Universe.colors));
-            });
+            Cell.font_brush = new SolidBrush(Universe.colors["cell_text"]);
+            Cell.cell_brush = new SolidBrush(Universe.colors["cell"]);
+
+            Cell.font_string_format = new StringFormat {
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Center
+            };
+            //_Universe.offset = _Universe.DefaultOffset(graphics_panel);
         }
 
         // methods
 
         // getters
 
-        public static Vector2 ClientSize(GraphicsPanel graphics_panel) =>
-            new Vector2(graphics_panel.ClientSize.Width, graphics_panel.ClientSize.Height);
+        public static Vector2 client_size =>
+            new Vector2(Universe.graphics_panel.ClientSize.Width, Universe.graphics_panel.ClientSize.Height);
 
-        public static int DefaultCellSize(GraphicsPanel graphics_panel) => (int)Math.Min(
-            Universe.ClientSize(graphics_panel).X,
-            Universe.ClientSize(graphics_panel).Y
-        ) / Universe.block_size;
+        public static float DefaultCellSize(GraphicsPanel graphics_panel) => Math.Min(
+            Universe.client_size.X,
+            Universe.client_size.Y
+        ) / Universe.zoom;
 
-        public static Vector2 DefaultOffset(GraphicsPanel graphics_panel) =>
-            (Universe.ClientSize(graphics_panel) - new Vector2(Universe.real_block_size)) / 2;
-
-        private static Vector2 FindClickedBlock(Vector2 mouse) => UVector2.Floor(
-            (mouse - Universe.offset) / Universe.real_block_size
-        );
+        //public static Vector2 DefaultOffset(GraphicsPanel graphics_panel) =>
+        //    (_Universe.client_size - new Vector2(Universe.real_block_size)) / 2;
 
         // TODO: not sure if I should be using `mod2` or `mod3` here.
-        private static Vector2 FindClickedCell(Vector2 mouse) => UVector2.Floor(
-            UVector2.mod3(mouse - Universe.offset, Universe.real_block_size) / Universe.cell_size
-        );
+        private static Vector2 FindClickedCell(Vector2 mouse) =>
+            UVector2.Floor((mouse - Universe.offset) / Universe.cell_size);
 
         // side_effects
 
+        public static void DrawGrid(PaintEventArgs e) {
+
+            (PointF p1, PointF p2) get_x_line(float offset_x) => (
+                new Vector2(offset_x, 0).ToPointF(),
+                new Vector2(offset_x, Universe.client_size.Y).ToPointF()
+            );
+
+            (PointF p1, PointF p2) get_y_line(float offset_y) => (
+                new Vector2(0, offset_y).ToPointF(),
+                new Vector2(Universe.client_size.X, offset_y).ToPointF()
+            );
+
+            var grid_pen = new Pen(Universe.colors["grid"], 1);
+
+            var virtual_window =
+                Universe.client_size + new Vector2(Universe.cell_size) -
+                UVector2.mod2(Universe.client_size, Universe.cell_size);
+
+            var total_lines = virtual_window / Universe.cell_size;
+            var biggest_axis = Math.Max(total_lines.X, total_lines.Y);
+
+            for (int n = 0; n < biggest_axis; n += 1) {
+                var offset = UVector2.mod3(new Vector2(n * Universe.cell_size) + Universe.offset, virtual_window);
+
+                if (offset.X < Universe.client_size.X) {
+                    var x_line = get_x_line(offset.X);
+                    e.Graphics.DrawLine(grid_pen, x_line.p1, x_line.p2);
+                }
+
+                if (offset.Y < Universe.client_size.Y) {
+                    var y_line = get_y_line(offset.Y);
+                    e.Graphics.DrawLine(grid_pen, y_line.p1, y_line.p2);
+                }
+            }
+
+            grid_pen.Dispose();
+        }
+
         public static void Draw(PaintEventArgs e) {
-            Universe.map.Values.ToList().ForEach((block) => {
-                block.Draw(e, Universe.cell_size, block.coord_id * Universe.real_block_size + Universe.offset);
+            // TODO: only paint and write cells that are visible
+            Universe.alive.ForEach((cell) => {
+                Universe.map[cell].Paint(e, new RectangleF(
+                    (cell * Universe.cell_size + Universe.offset).ToPointF(),
+                    new Vector2(Universe.cell_size).ToSizeF()
+                ));
             });
+
+            Universe.map.ForEach((cell) => {
+                Universe.map[cell].Write(e, new RectangleF(
+                    (cell * Universe.cell_size + Universe.offset).ToPointF(),
+                    new Vector2(Universe.cell_size).ToSizeF()
+                ));
+            });
+
+            Universe.DrawGrid(e);
+        }
+
+        public static void ApplyRules() {
+            Universe.map.ForEach((cell_id, cell) => {
+                cell.Set(cell.next_state);
+
+                if (cell.next_state == true) {
+                    Universe.SpawnCellNeighbors(cell_id);
+                    Universe.alive.Add(cell_id);
+                } else {
+                    Universe.alive.Remove(cell_id);
+                }
+            });
+        }
+
+        public static void CountAndSetCellNeighbours(Vector2 cell) {
+            Universe.map[cell].neighbors = Universe.CountCellNeighbours(cell);
+        }
+
+        public static void CountAndSetAllCells() {
+            Universe.map.ForEach(Universe.CountAndSetCellNeighbours);
         }
 
         // Calculate the next generation of cells
         public static void Next(ToolStripStatusLabel generation_gui) {
-            // advance every block
-            Universe.map.Values.ToList().ForEach(block => block.Next());
+            Universe.ApplyRules();
+            Universe.CountAndSetAllCells();
+            Universe.map.ForEach(Universe.RemoveIslandCell);
 
             Universe.generation += 1;
 
@@ -110,29 +168,85 @@ namespace month_6_Project_and_Portfolio_I {
         }
 
         public static void Reset() {
-            Universe.map.Keys.ToList().ForEach(block => Universe.map[block].Reset());
-
-            // TODO: this resets all blocks but does not remove any unneeded blocks.
+            Universe.map.Clear();
+            Universe.alive.Clear();
         }
 
-        public static void ToggleCellAtMousePosition(Vector2 mouse_position) {
-            var block = Universe.FindClickedBlock(mouse_position);
-            var cell = Universe.FindClickedCell(mouse_position);
+        public static void Toggle(Vector2 cell) {
+            Universe.map[cell].Toggle();
 
-            /**
-              * NOTE: When recounting neighbours, I can't use `CountAndSetCellNeighbours`
-              * since it's a wrapper for `cell.neighbours = <int>` with error correction.
-              * Instead I need to find neighbours myself by matrix scanning.
-              */
+            if (Universe.map[cell].is_alive) {
+                Universe.alive.Add(cell);
+            } else {
+                Universe.alive.Remove(cell);
+            }
+        }
 
-            if (Universe.map.ContainsKey(block)) {
+        public static int CountCellNeighbours(Vector2 cell) {
+            // NOTE: using `return` for clarity
+            return UMatrix.Reduce3x3Matrix(cell, (total, curr_neighbour) => {
+                // count if not self, I'm keeping track of it, and is alive. Short circuiting `isAlive`.
+                return curr_neighbour != cell && Universe.map.ContainsKey(curr_neighbour) && Universe.map[curr_neighbour].is_alive
+                    ? total + 1
+                    : total;
+            }, 0);
+        }
+
+        public static void SpawnCellNeighbors(Vector2 cell) {
+            UMatrix.ForEach3x3Matrix(cell, (neighbor) => {
+                if (cell != neighbor && !Universe.map.ContainsKey(neighbor)) {
+                    Universe.map[neighbor] = new Cell(false);
+                }
+            });
+        }
+
+        public static void RemoveIslandCell(Vector2 cell) {
+            if (
+                Universe.map.ContainsKey(cell) &&
+                !Universe.map[cell].is_alive &&
+                !Universe.map[cell].has_neighbors
+            ) {
+                Universe.map.Remove(cell);
+            }
+        }
+
+        public static void RemoveIslandCellNeighbors(Vector2 cell) {
+            UMatrix.ForEach3x3Matrix(cell, Universe.RemoveIslandCell);
+        }
+
+        public static void ResetCellNeighbours(Vector2 cell) {
+            UMatrix.ForEach3x3Matrix(cell, (neighbor) => {
+                Universe.map[neighbor].neighbors = 0;
+            });
+        }
+
+        public static void SpawnCell(Vector2 cell) {
+            Universe.map[cell] = new Cell(true);
+            Universe.alive.Add(cell);
+        }
+
+        public static void ToggleAtMousePosition(Vector2 mouse_position) {
+            var cell = FindClickedCell(mouse_position);
+
+            if (Universe.map.ContainsKey(cell)) {
                 // toggle
-                Universe.map[block].Toggle(cell);
-                // reset neighbours
-                Universe.map[block].ResetCellNeighbours(cell);
-                // recount neighbours
-                UMatrix.ForEach3x3Matrix(cell, Universe.map[block].CountAndSetCellNeighbours);
-            };
+                Universe.Toggle(cell);
+            } else {
+                // make
+                Universe.SpawnCell(cell);
+            }
+
+            // spawn any neighbors if they're not there
+            Universe.SpawnCellNeighbors(cell);
+
+            // reset neighbours
+            Universe.ResetCellNeighbours(cell);
+
+            // recount neighbours
+            UMatrix.ForEach3x3Matrix(cell, Universe.CountAndSetCellNeighbours);
+
+            // cleanup any dead cells with no neighbours
+            Universe.RemoveIslandCellNeighbors(cell);
         }
     }
 }

@@ -25,16 +25,22 @@ namespace month_6_Project_and_Portfolio_I {
         public static Vector2 mod2(Vector2 a, Vector2 b) => a - b * UVector2.Floor(a / b);
         public static Vector2 mod3(Vector2 a, Vector2 b) => a - Vector2.Abs(b) * UVector2.Floor(a / Vector2.Abs(b));
 
-        public static Vector2 mod1(Vector2 a, int b) => a - b * (a / b);
-        public static Vector2 mod2(Vector2 a, int b) => a - b * UVector2.Floor(a / b);
-        public static Vector2 mod3(Vector2 a, int b) => a - new Vector2(Math.Abs(b)) * UVector2.Floor(a / Math.Abs(b));
+        public static Vector2 mod1(Vector2 a, float b) => a - b * (a / b);
+        public static Vector2 mod2(Vector2 a, float b) => a - b * UVector2.Floor(a / b);
+        public static Vector2 mod3(Vector2 a, float b) => a - new Vector2(Math.Abs(b)) * UVector2.Floor(a / Math.Abs(b));
 
-        public static PointF ToPointF(this Vector2 point) => new PointF(point.X, point.Y);
+        public static PointF ToPointF(this Vector2 vector2) => new PointF(vector2.X, vector2.Y);
+        public static SizeF ToSizeF(this Vector2 vector2) => new SizeF(vector2.X, vector2.Y);
     }
 
     public static class UIEnumerable {
         public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> enumerable) =>
             enumerable.ToDictionary(pair => pair.Key, pair => pair.Value);
+    }
+
+    public static class UHashSet {
+        public static void ForEach<T>(this HashSet<T> hashset, Action<T> callback) =>
+            hashset.ToList().ForEach((item) => callback(item));
     }
 
     public static class UDictionary {

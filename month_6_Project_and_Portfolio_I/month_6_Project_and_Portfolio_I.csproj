@@ -51,9 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Block.cs" />
     <Compile Include="Cell.cs" />
-    <Compile Include="Universe.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="Window.cs">
       <SubType>Form</SubType>
@@ -66,7 +64,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="_Universe.cs" />
+    <Compile Include="Universe.cs" />
     <EmbeddedResource Include="Window.resx">
       <DependentUpon>Window.cs</DependentUpon>
     </EmbeddedResource>

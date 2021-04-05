@@ -17,56 +17,35 @@ namespace month_6_Project_and_Portfolio_I {
         public static StringFormat font_string_format;
         public static Brush cell_brush;
 
-        // getters
-        public Vector2 Value { get => this.cell; }
-        public bool IsAlive { get => this.state; }
+        public bool is_alive { get => this.state; }
 
         // properties
-        public int neighbours = 0;
+        public int neighbors = 0;
+        public bool has_neighbors => neighbors != 0;
 
-        // private
-
-        // readonly
-        private readonly Vector2 cell;
-
-        // properties
         private bool state;
 
-        // constructor
-        public Cell(Vector2 cell, bool state) {
+        public Cell(bool state) {
             this.state = state;
-            this.cell = cell;
         }
 
-        // methods
-
-        // setters
-
-        public void Set(bool value) {
-            this.state = value;
-        }
+        public void Set(bool value) => this.state = value;
         
         public void Toggle() => this.state = !this.state;
 
-        // getters
-
-
-
-        public bool NextState(int neighbour_count) => this.IsAlive
-            ? neighbour_count == 2 || neighbour_count == 3
-            : neighbour_count == 3;
-
-        // side effects
+        public bool next_state => this.is_alive
+            ? this.neighbors == 2 || this.neighbors == 3
+            : this.neighbors == 3;
         
-        public void Draw(PaintEventArgs e, Rectangle rectangle) {
-            if (this.IsAlive) {
+        public void Paint(PaintEventArgs e, RectangleF rectangle) {
+            if (this.is_alive) {
                 e.Graphics.FillRectangle(Cell.cell_brush, rectangle);
             }
         }
 
-        public void Write(PaintEventArgs e, Rectangle rectangle) {
+        public void Write(PaintEventArgs e, RectangleF rectangle) {
             e.Graphics.DrawString(
-                this.neighbours.ToString(),
+                this.neighbors.ToString(),
                 Cell.font,
                 Cell.font_brush,
                 rectangle,
