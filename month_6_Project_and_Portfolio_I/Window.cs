@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Numerics;
+using System.IO;
 
 namespace month_6_Project_and_Portfolio_I {
     public partial class Window : Form {
@@ -166,5 +167,43 @@ namespace month_6_Project_and_Portfolio_I {
 
         private void Window_ResizeEnd(object sender, EventArgs e) =>
             this.input["resize"] = false;
+
+        private void saveToolStripButton_Click(object sender, EventArgs e) {
+            SaveFileDialog dlg = new SaveFileDialog();
+            dlg.Filter = "All Files|*.*|Cells|*.cells";
+            dlg.FilterIndex = 2;
+            dlg.DefaultExt = "cells";
+
+            if (dlg.ShowDialog() == DialogResult.OK){
+                StreamWriter writer = new StreamWriter(dlg.FileName);
+
+                // add comments if necesary
+                writer.WriteLine("!This is my comment.");
+
+                Universe.SaveStateAs(Universe.SAVE_FORMAT.CELLS).ToList()
+                    .ForEach(writer.WriteLine);
+
+                //// Iterate through the universe one row at a time.
+                //for (int y = 0; y < universe Height; y++) {
+                //    // Create a string to represent the current row.
+                //    String currentRow = string.Empty;
+
+                //    // Iterate through the current row one cell at a time.
+                //    for (int x = 0; x < universe Width; x++) {
+                //        // If the universe[x,y] is alive then append 'O' (capital O)
+                //        // to the row string.
+
+                //        // Else if the universe[x,y] is dead then append '.' (period)
+                //        // to the row string.
+                //    }
+
+                //    // Once the current row has been read through and the 
+                //    // string constructed then write it to the file using WriteLine.
+                //}
+
+                // After all rows and columns have been written then close the file.
+                writer.Close();
+            }
+        }
     }
 }

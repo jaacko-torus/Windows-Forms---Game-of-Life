@@ -79,6 +79,62 @@ namespace month_6_Project_and_Portfolio_I {
         public static Vector2 DefaultOffset() => Universe.client_size / 2;
 
 
+
+
+
+
+
+
+        private static Vector2 FindMinCoordinate() =>
+            Universe.alive.Aggregate((min, curr) => new Vector2(
+                curr.X < min.X ? curr.X : min.X,
+                curr.Y < min.Y ? curr.Y : min.Y));
+        private static Vector2 FindMaxCoordinate() =>
+            Universe.alive.Aggregate((min, curr) => new Vector2(
+                curr.X > min.X ? curr.X : min.X,
+                curr.Y > min.Y ? curr.Y : min.Y));
+
+        public enum SAVE_FORMAT {
+            CELLS,
+            RLE
+        }
+
+        public static string[] SaveStateAs(SAVE_FORMAT format) => new Dictionary<SAVE_FORMAT, Func<string[]>>() {
+            {
+                SAVE_FORMAT.CELLS, () => {
+                    var min = Universe.FindMinCoordinate();
+                    var max = Universe.FindMaxCoordinate();
+
+                    var size = max - min + Vector2.One;
+
+                    var result = new string[(int)size.Y];
+
+                    UMatrix.ForEachRotated(size,
+                        (y) => {
+                            result[y] = "";
+                        },
+
+                        (x, y) => {
+                            var cell = min + new Vector2(x, y);
+                            var alive = Universe.map.ContainsKey(cell) && Universe.map[cell].is_alive;
+                            result[y] += alive ? "O" : ".";
+                        }
+                    );
+
+                    return result;
+                }
+            }, {
+                SAVE_FORMAT.RLE, () => {
+                    return new string[0];
+                }
+            }
+        }[format]();
+
+
+
+
+
+
         // cell actions
 
 
@@ -105,7 +161,7 @@ namespace month_6_Project_and_Portfolio_I {
         }
 
         private static void SpawnCellNeighbors(Vector2 cell) {
-            UMatrix.ForEach3x3Matrix(cell, (neighbor) => {
+            UMatrix.ForEach3x3(cell, (neighbor) => {
                 if (cell != neighbor && !Universe.map.ContainsKey(neighbor)) {
                     Universe.map[neighbor] = new Cell(false);
                 }
@@ -119,7 +175,7 @@ namespace month_6_Project_and_Portfolio_I {
         }
 
         private static void RemoveIslandCellNeighbors(Vector2 cell) =>
-            UMatrix.ForEach3x3Matrix(cell, Universe.RemoveIslandCell);
+            UMatrix.ForEach3x3(cell, Universe.RemoveIslandCell);
 
 
         // cell counting
@@ -127,7 +183,7 @@ namespace month_6_Project_and_Portfolio_I {
 
         private static int CountCellNeighbours(Vector2 cell) {
             // NOTE: using `return` for clarity
-            return UMatrix.Reduce3x3Matrix(cell, (total, curr_neighbour) => {
+            return UMatrix.Reduce3x3(cell, (total, curr_neighbour) => {
                 // count if not self, I'm keeping track of it, and is alive. Short circuiting `isAlive`.
                 return curr_neighbour != cell && Universe.map.ContainsKey(curr_neighbour) && Universe.map[curr_neighbour].is_alive
                     ? total + 1
@@ -256,7 +312,7 @@ namespace month_6_Project_and_Portfolio_I {
             Universe.SpawnCellNeighbors(cell);
 
             // recount neighbours
-            UMatrix.ForEach3x3Matrix(cell, Universe.CountAndSetCellNeighbours);
+            UMatrix.ForEach3x3(cell, Universe.CountAndSetCellNeighbours);
 
             // cleanup any dead cells with no neighbours
             Universe.RemoveIslandCellNeighbors(cell);

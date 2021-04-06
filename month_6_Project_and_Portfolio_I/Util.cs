@@ -60,9 +60,39 @@ namespace month_6_Project_and_Portfolio_I {
     }
 
     public static class UMatrix {
-        public delegate void ForEachMatrixCallback(Vector2 curr_cell);
+        public delegate void ForEachXCallback(int x);
+        public delegate void ForEachYCallback(int y);
+        public delegate void ForEachXYCallback(int x, int y);
 
-        public static void ForEach3x3Matrix(Vector2 curr_cell, ForEachMatrixCallback callback) {
+        public static void ForEach(Vector2 size, ForEachXCallback x_callback, ForEachXYCallback xy_callback) {
+            for (int x = 0; x < size.X; x += 1) {
+                x_callback(x);
+
+                for (int y = 0; y < size.Y; y += 1) {
+                    xy_callback(x, y);
+                }
+            }
+        }
+
+        public static void ForEach(Vector2 size, ForEachXYCallback xy_callback) =>
+            UMatrix.ForEach(size, (x) => { }, xy_callback);
+
+        public static void ForEachRotated(Vector2 size, ForEachYCallback y_callback, ForEachXYCallback xy_callback) =>
+            UMatrix.ForEach(new Vector2(size.Y, size.X), (y) => y_callback(y), (x, y) => xy_callback(y, x));
+
+        public static void ForEachRotated(Vector2 size, ForEachXYCallback xy_callback) =>
+            UMatrix.ForEachRotated(size, (y) => { }, xy_callback);
+
+
+
+
+
+
+
+        public delegate void ForEach3x3Callback(Vector2 curr_cell);
+
+        public static void ForEach3x3(Vector2 curr_cell, ForEach3x3Callback callback) {
+            // TODO: rewrite this in terms of ForEach
             for (int x_offset = -1; x_offset <= 1; x_offset += 1) {
                 for (int y_offset = -1; y_offset <= 1; y_offset += 1) {
                     callback(curr_cell + new Vector2(x_offset, y_offset));
@@ -72,20 +102,20 @@ namespace month_6_Project_and_Portfolio_I {
 
 
 
-        public delegate T ReduceMatrixCallback<T>(T prev_cell, Vector2 curr_cell);
+        public delegate T Reduce3x3Callback<T>(T prev_cell, Vector2 curr_cell);
 
-        public static T Reduce3x3Matrix<T>(Vector2 curr_cell, ReduceMatrixCallback<T> callback, T initial) {
+        public static T Reduce3x3<T>(Vector2 curr_cell, Reduce3x3Callback<T> callback, T initial) {
             T result = initial;
 
-            UMatrix.ForEach3x3Matrix(curr_cell, curr_neighbour => {
+            UMatrix.ForEach3x3(curr_cell, curr_neighbour => {
                 result = callback(result, curr_neighbour);
             });
 
             return result;
         }
 
-        public static Vector2 Reduce3x3Matrix(Vector2 curr_cell, ReduceMatrixCallback<Vector2> callback) {
-            return UMatrix.Reduce3x3Matrix<Vector2>(
+        public static Vector2 Reduce3x3(Vector2 curr_cell, Reduce3x3Callback<Vector2> callback) {
+            return UMatrix.Reduce3x3<Vector2>(
                 curr_cell,
                 (prev, curr) => curr_cell == curr ? prev : callback(prev, curr),
                 curr_cell
