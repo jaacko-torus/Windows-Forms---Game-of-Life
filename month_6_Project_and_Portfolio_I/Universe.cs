@@ -102,6 +102,10 @@ namespace month_6_Project_and_Portfolio_I {
         public static string[] SaveStateAs(SAVE_FORMAT format) => new Dictionary<SAVE_FORMAT, Func<string[]>>() {
             {
                 SAVE_FORMAT.CELLS, () => {
+                    if (!Universe.alive.Any()) {
+                        return new string[] { "." };
+                    }
+
                     var min = Universe.FindMinCoordinate();
                     var max = Universe.FindMaxCoordinate();
 
@@ -125,7 +129,30 @@ namespace month_6_Project_and_Portfolio_I {
                 }
             }, {
                 SAVE_FORMAT.RLE, () => {
-                    return new string[0];
+                    return new string[] { "." };
+                }
+            }
+        }[format]();
+
+        public static void OpenStateAs(SAVE_FORMAT format, string[] state) => new Dictionary<SAVE_FORMAT, Action>() {
+            {
+                SAVE_FORMAT.CELLS, () => {
+                    UMatrix.ForEachRotated(new Vector2(state[0].Length, state.Length),
+                        (x, y) => {
+                            if (state[y][x] == 'O') {
+                                Universe.SpawnCell(new Vector2(x, y));
+                            }
+                            // NOTE: no need for exhaustive match or sanitization, function assumes `state` is already sanitized
+                        }
+                    );
+
+                    Universe.alive.ForEach(Universe.SpawnCellNeighbors);
+
+                    Universe.CountAndSetAllCells();
+                }
+            }, {
+                SAVE_FORMAT.RLE, () => {
+
                 }
             }
         }[format]();

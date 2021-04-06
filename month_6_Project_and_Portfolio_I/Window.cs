@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Numerics;
 using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace month_6_Project_and_Portfolio_I {
     public partial class Window : Form {
@@ -170,11 +172,11 @@ namespace month_6_Project_and_Portfolio_I {
 
         private void saveToolStripButton_Click(object sender, EventArgs e) {
             SaveFileDialog dlg = new SaveFileDialog();
-            dlg.Filter = "All Files|*.*|Cells|*.cells";
+            dlg.Filter = "All Files|*.*|Cells|*.cells|RLE|*.rle";
             dlg.FilterIndex = 2;
             dlg.DefaultExt = "cells";
 
-            if (dlg.ShowDialog() == DialogResult.OK){
+            if (dlg.ShowDialog() == DialogResult.OK) {
                 StreamWriter writer = new StreamWriter(dlg.FileName);
 
                 // add comments if necesary
@@ -183,26 +185,79 @@ namespace month_6_Project_and_Portfolio_I {
                 Universe.SaveStateAs(Universe.SAVE_FORMAT.CELLS).ToList()
                     .ForEach(writer.WriteLine);
 
-                //// Iterate through the universe one row at a time.
-                //for (int y = 0; y < universe Height; y++) {
-                //    // Create a string to represent the current row.
-                //    String currentRow = string.Empty;
-
-                //    // Iterate through the current row one cell at a time.
-                //    for (int x = 0; x < universe Width; x++) {
-                //        // If the universe[x,y] is alive then append 'O' (capital O)
-                //        // to the row string.
-
-                //        // Else if the universe[x,y] is dead then append '.' (period)
-                //        // to the row string.
-                //    }
-
-                //    // Once the current row has been read through and the 
-                //    // string constructed then write it to the file using WriteLine.
-                //}
-
-                // After all rows and columns have been written then close the file.
                 writer.Close();
+            }
+        }
+
+        private void openToolStripButton_Click(object sender, EventArgs e) {
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Filter = "All Files|*.*|Cells|*.cells";
+            dlg.FilterIndex = 2;
+
+            if (DialogResult.OK == dlg.ShowDialog()) {
+                var file_name = dlg.FileName;
+                StreamReader reader = new StreamReader(file_name);
+
+                dlg.Dispose();
+
+                var state = reader.ReadToEnd().Split(Environment.NewLine.ToCharArray())
+                    .Where(line => line.Length > 0 && line[0] != '!').ToList();
+
+                reader.Close();
+
+                bool parsing_failed = false;
+
+                var cells_format_matches = new Regex(@"\.cells$", RegexOptions.Multiline).IsMatch(file_name);
+                var rle_format_matches = new Regex(@"\.rle$").IsMatch(file_name);
+
+                if (state.Count > 0) {
+                    if (cells_format_matches || rle_format_matches) {
+                        Regex formating;
+
+                        bool state_has_no_formatting_errors = false;
+
+                        if (cells_format_matches) {
+                            formating = new Regex(@"^[O.]+$", RegexOptions.Multiline);
+                        
+                            var first_line_length = state[0].Length;
+
+                            state_has_no_formatting_errors = state
+                                .All(line => formating.IsMatch(line) && line.Length == first_line_length);
+
+                            Console.WriteLine(state.Aggregate((p, c) => p + "\n" + c));
+                        }
+
+                        if (rle_format_matches) {
+
+                        }
+
+                        if (state_has_no_formatting_errors) {
+                            this.reset();
+                            Universe.Reset(this.toolStripStatusLabelGenerations);
+                            this.nextGenTimer.Stop();
+
+                            Universe.OpenStateAs(Universe.SAVE_FORMAT.CELLS, state.ToArray());
+
+                            this.redraw();
+                        } else {
+                            parsing_failed = true;
+                        }
+                    } else {
+                        parsing_failed = true;
+                    }
+                }
+
+                if (parsing_failed) {
+                    DialogResult result = MessageBox.Show(
+                        $"Make sure the `{ new Regex(@"\.[\w]+$").Match(file_name) }` file you are using is formated correctly.\nClick retry when you're ready to select a file again.",
+                        "Invalid format",
+                        MessageBoxButtons.RetryCancel
+                    );
+
+                    if (result == DialogResult.Retry) {
+                        openToolStripButton_Click(sender, e);
+                    }
+                }
             }
         }
     }
