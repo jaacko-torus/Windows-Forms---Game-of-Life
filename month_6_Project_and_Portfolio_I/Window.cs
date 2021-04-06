@@ -179,19 +179,29 @@ namespace month_6_Project_and_Portfolio_I {
             if (dlg.ShowDialog() == DialogResult.OK) {
                 StreamWriter writer = new StreamWriter(dlg.FileName);
 
-                // add comments if necesary
-                writer.WriteLine("!This is my comment.");
+                var cells_format_matches = new Regex(@"\.cells$", RegexOptions.Multiline).IsMatch(dlg.FileName);
+                var rle_format_matches = new Regex(@"\.rle$", RegexOptions.Multiline).IsMatch(dlg.FileName);
 
-                Universe.SaveStateAs(Universe.SAVE_FORMAT.CELLS).ToList()
-                    .ForEach(writer.WriteLine);
+                if (rle_format_matches) {
+                    Universe.SaveStateAs(Universe.SAVE_FORMAT.RLE).ToList()
+                        .ForEach(writer.WriteLine);
+                } else /* if (cells_format_matches) */ {
+                    // NOTE: cells is the default format
 
+                    // add comments if necesary
+                    writer.WriteLine("!This is my comment.");
+
+                    Universe.SaveStateAs(Universe.SAVE_FORMAT.CELLS).ToList()
+                        .ForEach(writer.WriteLine);
+                }
+                
                 writer.Close();
             }
         }
 
         private void openToolStripButton_Click(object sender, EventArgs e) {
             OpenFileDialog dlg = new OpenFileDialog();
-            dlg.Filter = "All Files|*.*|Cells|*.cells";
+            dlg.Filter = "All Files|*.*|Cells|*.cells|RLE|*.rle";
             dlg.FilterIndex = 2;
 
             if (DialogResult.OK == dlg.ShowDialog()) {
@@ -208,7 +218,7 @@ namespace month_6_Project_and_Portfolio_I {
                 bool parsing_failed = false;
 
                 var cells_format_matches = new Regex(@"\.cells$", RegexOptions.Multiline).IsMatch(file_name);
-                var rle_format_matches = new Regex(@"\.rle$").IsMatch(file_name);
+                var rle_format_matches = new Regex(@"\.rle$", RegexOptions.Multiline).IsMatch(file_name);
 
                 if (state.Count > 0) {
                     if (cells_format_matches || rle_format_matches) {
