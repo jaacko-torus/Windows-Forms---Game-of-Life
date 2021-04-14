@@ -30,7 +30,7 @@ namespace month_6_Project_and_Portfolio_I {
         public Window() {
             this.InitializeComponent();
 
-            Universe.Start(this.graphicsPanelMain);
+            Universe.Initialize(this.graphicsPanelMain);
 
             // Setup the timer
             this.nextGenTimer.Interval = 200;
@@ -47,8 +47,7 @@ namespace month_6_Project_and_Portfolio_I {
         }
 
         private void reset() {
-
-            Universe.Start(this.graphicsPanelMain);
+            Universe.Initialize(this.graphicsPanelMain);
             this.nextGenTimer.Start();
         }
 
@@ -75,14 +74,8 @@ namespace month_6_Project_and_Portfolio_I {
             )) * this.speed;
 
             if (movement != Vector2.Zero) {
-                Universe.offset += movement;
-            }
-
-            if (this.input["resize"]) {
-                // idk how to resize :(
-
-                // TODO: make sure center 
-                // Universe.offset = Universe.ToClientPosition(Universe.DefaultOffset());
+                Universe.camera.position += movement;
+                //Universe.offset += movement;
             }
 
             if (this.input.Values.Contains(true)) {
@@ -95,12 +88,10 @@ namespace month_6_Project_and_Portfolio_I {
             { "left",   false },
             { "right",  false },
             { "up",     false },
-            { "down",   false },
-
-            { "resize", false }
+            { "down",   false }
         };
 
-        private Dictionary<string, Keys[]> key_map = new Dictionary<string, Keys[]>() {
+        private readonly Dictionary<string, Keys[]> key_map = new Dictionary<string, Keys[]>() {
             { "left",  new Keys[] { Keys.A, Keys.Left } },
             { "right", new Keys[] { Keys.D, Keys.Right } },
             { "up",    new Keys[] { Keys.W, Keys.Up } },
@@ -110,15 +101,16 @@ namespace month_6_Project_and_Portfolio_I {
         };
 
         private void keyDown(object sender, KeyEventArgs e) {
+            if (this.key_map["pause"].Contains(e.KeyCode)) {
+                this.toggleTimer();
+                return;
+            }
+
             this.key_map.ForEach((name, keys) => {
                 if (keys.Contains(e.KeyCode) && this.input.ContainsKey(name)) {
                     this.input[name] = true;
                 }
             });
-
-            if (this.key_map["pause"].Contains(e.KeyCode)) {
-                this.toggleTimer();
-            }
         }
 
         private void keyUp(object sender, KeyEventArgs e) {
@@ -131,6 +123,18 @@ namespace month_6_Project_and_Portfolio_I {
 
         private void graphicsPanelMain_Paint(object sender, PaintEventArgs e) {
             Universe.Draw(e);
+
+            this.toolStripStatusMousePosition.Text = $"Mouse Position = ({this.mouse_position.X}, {this.mouse_position.Y})";
+
+            // draw mouse position
+
+            //e.Graphics.DrawString(
+            //    this.neighbors.ToString(),
+            //    Cell.font,
+            //    Cell.font_brush,
+            //    rectangle,
+            //    Cell.font_string_format
+            //);
         }
 
         private void graphicsPanelMain_MouseClick(object sender, MouseEventArgs e) {
@@ -163,12 +167,6 @@ namespace month_6_Project_and_Portfolio_I {
             this.nextGenTimer.Stop();
             this.redraw();
         }
-
-        private void Window_ResizeBegin(object sender, EventArgs e) =>
-            this.input["resize"] = true;
-
-        private void Window_ResizeEnd(object sender, EventArgs e) =>
-            this.input["resize"] = false;
 
         private void saveToolStripButton_Click(object sender, EventArgs e) {
             SaveFileDialog dlg = new SaveFileDialog();
@@ -269,6 +267,20 @@ namespace month_6_Project_and_Portfolio_I {
                     }
                 }
             }
+        }
+
+        private void toolStripButtonRandom_Click(object sender, EventArgs e) {
+            this.reset();
+            Universe.Reset(this.toolStripStatusLabelGenerations);
+            Universe.Random();
+            this.nextGenTimer.Stop();
+            this.redraw();
+        }
+
+        private Vector2 mouse_position;
+        private void Window_MouseMove(object sender, MouseEventArgs e) {
+            this.mouse_position = Universe.FindClickedCell(new Vector2(e.X, e.Y));
+            this.redraw();
         }
     }
 }

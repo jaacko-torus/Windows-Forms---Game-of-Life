@@ -13,8 +13,30 @@ namespace month_6_Project_and_Portfolio_I {
             CUSTOM
         }
 
+        public enum SizeType {
+            CLIENT,
+            CUSTOM
+        }
+
+        public GraphicsPanel graphics_panel;
+
         public Vector2 position;
-        public Vector2 size;
+        public float zoom;
+        public Vector2 world_position => this.ScreenToWorld(this.position);
+
+        public SizeType size_type = SizeType.CLIENT;
+        private Vector2 _size;
+        public Vector2 size {
+            get =>
+                this.size_type == SizeType.CLIENT ? this.graphics_panel.ClientSize.ToVector2() :
+                this._size; // this.size_type == SizeType.CUSTOM
+
+            set {
+                if (this.size_type == SizeType.CUSTOM) {
+                    this._size = value;
+                }
+            }
+        }
 
         public AnchorType anchor_type = AnchorType.CENTER;
         private Vector2 _anchor;
@@ -22,14 +44,62 @@ namespace month_6_Project_and_Portfolio_I {
             get =>
                 this.anchor_type == AnchorType.TOP_LEFT ? this.position :
                 this.anchor_type == AnchorType.CENTER   ? (this.size - this.position) / 2 + this.position :
-                this.anchor_type == AnchorType.CUSTOM   ? this._anchor :
-                new Vector2(float.NaN, float.NaN);
-            
+                this._anchor; // this.anchor_type == AnchorType.CUSTOM
+
             set {
                 if (this.anchor_type == AnchorType.CUSTOM) {
                     this._anchor = value;
                 }
             }
         }
+
+        public Vector2 top_left     => this.position - this.anchor;
+        public Vector2 bottom_right => this.position + (this.size - this.anchor);
+
+        public float left   => this.top_left.X;
+        public float right  => this.bottom_right.X;
+        public float top    => this.top_left.Y;
+        public float bottom => this.bottom_right.Y;
+
+        public Camera(
+            GraphicsPanel graphics_panel, Vector2 position,
+            SizeType size_type, Vector2 size,
+            AnchorType anchor_type, Vector2 anchor
+        ) {
+            this.graphics_panel = graphics_panel;
+
+            this.position = position;
+
+            this.zoom = 10;
+
+            this.anchor_type = anchor_type;
+            
+            if (size_type == SizeType.CUSTOM) {
+                this.size = size;
+            }
+
+            this.anchor_type = anchor_type;
+            
+            if (anchor_type == AnchorType.CUSTOM) {
+                this.anchor = anchor;
+            }
+        }
+
+        public Camera(GraphicsPanel graphics_panel, Vector2 position, Vector2 size, Vector2 anchor) : this(
+            graphics_panel, position,
+            SizeType.CLIENT, size,
+            AnchorType.CENTER, anchor
+        ) { }
+
+        public Camera(
+            GraphicsPanel graphics_panel,
+            Vector2 position, Vector2 size
+        ) : this(graphics_panel, position, size, Vector2.Zero) { }
+
+        public Vector2 ScreenToWorld(Vector2 vector2) =>
+            vector2 + this.position + this.anchor;
+
+        public Vector2 WorldToScreen(Vector2 vector2) =>
+            vector2 - this.anchor - this.position;
     }
 }

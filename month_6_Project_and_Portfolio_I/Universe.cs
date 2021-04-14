@@ -11,10 +11,7 @@ namespace month_6_Project_and_Portfolio_I {
     static class Universe {
         private static GraphicsPanel graphics_panel;
 
-        public static Vector2 client_size =>
-            new Vector2(Universe.graphics_panel.ClientSize.Width, Universe.graphics_panel.ClientSize.Height);
-
-        private static float zoom = 10;
+        public static Camera camera;
 
         private static float _cell_size;
         private static float cell_size {
@@ -26,7 +23,7 @@ namespace month_6_Project_and_Portfolio_I {
 
         }
 
-        public static Vector2 offset;
+        //public static Vector2 offset;
 
         public static int generation = 0;
 
@@ -47,18 +44,17 @@ namespace month_6_Project_and_Portfolio_I {
             { "cell_text",           Color.FromArgb(0xEC, 0xEF, 0xF4) }
         };
 
-        public static Vector2 ToWorldPosition(Vector2 v) =>
-            v - Universe.offset;
-
-        public static Vector2 ToClientPosition(Vector2 v) =>
-            v + Universe.offset;
-
-        public static void Start(GraphicsPanel graphics_panel) {
+        public static void Initialize(GraphicsPanel graphics_panel) {
             Universe.graphics_panel = graphics_panel;
+
+            Universe.camera = new Camera(graphics_panel,
+                new Vector2(0, 0),
+                Universe.graphics_panel.ClientSize.ToVector2()
+            );
 
             Universe.cell_size = Universe.DefaultCellSize();
 
-            Universe.offset = Universe.DefaultOffset();
+            
 
             Cell.font_brush = new SolidBrush(Universe.colors["cell_text"]);
             Cell.cell_brush = new SolidBrush(Universe.colors["cell"]);
@@ -74,9 +70,7 @@ namespace month_6_Project_and_Portfolio_I {
         // default values
 
         private static float DefaultCellSize() =>
-            Math.Min(Universe.client_size.X, Universe.client_size.Y) / Universe.zoom;
-
-        public static Vector2 DefaultOffset() => Universe.client_size / 2;
+            Math.Min(Universe.camera.size.X, Universe.camera.size.Y) / Universe.camera.zoom;
 
 
 
@@ -102,7 +96,7 @@ namespace month_6_Project_and_Portfolio_I {
         public static string[] SaveStateAs(SAVE_FORMAT format) => new Dictionary<SAVE_FORMAT, Func<string[]>>() {
             {
                 SAVE_FORMAT.CELLS, () => {
-                    if (!Universe.alive.Any()) {
+                    if (Universe.alive.Count == 0) {
                         return new string[] { "." };
                     }
 
@@ -137,14 +131,13 @@ namespace month_6_Project_and_Portfolio_I {
         public static void OpenStateAs(SAVE_FORMAT format, string[] state) => new Dictionary<SAVE_FORMAT, Action>() {
             {
                 SAVE_FORMAT.CELLS, () => {
-                    UMatrix.ForEachRotated(new Vector2(state[0].Length, state.Length),
-                        (x, y) => {
-                            if (state[y][x] == 'O') {
-                                Universe.SpawnCell(new Vector2(x, y));
-                            }
-                            // NOTE: no need for exhaustive match or sanitization, function assumes `state` is already sanitized
+                    // `state` comes pre-sanitized
+                    // TODO: use `ForEach` instead of the rotated version?
+                    UMatrix.ForEachRotated(new Vector2(state[0].Length, state.Length), (x, y) => {
+                        if (state[y][x] == 'O') {
+                            Universe.SpawnCell(new Vector2(x - (state.Length / 2), y - (state[0].Length / 2)));
                         }
-                    );
+                    });
 
                     Universe.alive.ForEach(Universe.SpawnCellNeighbors);
 
@@ -156,6 +149,32 @@ namespace month_6_Project_and_Portfolio_I {
                 }
             }
         }[format]();
+
+        public static void Random() {
+            int size = 10;
+            float half_size = (float)size / 2;
+
+            float distribution_from_float(float n, float scale) =>
+                (float)Math.Pow(Math.E, -Math.Pow((float)n / (float)scale, 2));
+
+            var rnd = new Random();
+
+            UMatrix.ForEach(new Vector2(size),
+                (x, y) => {
+                    var distribution_weight =
+                        distribution_from_float((float)x - half_size, half_size) *
+                        distribution_from_float((float)y - half_size, half_size);
+
+                    if (distribution_weight > rnd.NextDouble()) {
+                        Universe.SpawnCell(new Vector2(x, y));
+                    }
+                }
+            );
+
+            Universe.alive.ForEach(Universe.SpawnCellNeighbors);
+
+            Universe.CountAndSetAllCells();
+        }
 
 
 
@@ -231,32 +250,32 @@ namespace month_6_Project_and_Portfolio_I {
         private static void DrawGrid(PaintEventArgs e) {
             (PointF p1, PointF p2) get_x_line(float offset_x) => (
                 new Vector2(offset_x, 0).ToPointF(),
-                new Vector2(offset_x, Universe.client_size.Y).ToPointF()
+                new Vector2(offset_x, Universe.camera.size.Y).ToPointF()
             );
 
             (PointF p1, PointF p2) get_y_line(float offset_y) => (
                 new Vector2(0, offset_y).ToPointF(),
-                new Vector2(Universe.client_size.X, offset_y).ToPointF()
+                new Vector2(Universe.camera.size.X, offset_y).ToPointF()
             );
 
             var grid_pen = new Pen(Universe.colors["grid"], 1);
 
             var virtual_window =
-                Universe.client_size + new Vector2(Universe.cell_size) -
-                UVector2.mod2(Universe.client_size, Universe.cell_size);
+                Universe.camera.size + new Vector2(Universe.cell_size) -
+                UVector2.mod2(Universe.camera.size, Universe.cell_size);
 
             var total_lines = virtual_window / Universe.cell_size;
             var biggest_axis = Math.Max(total_lines.X, total_lines.Y);
 
             for (int n = 0; n < biggest_axis; n += 1) {
-                var offset = UVector2.mod3(new Vector2(n * Universe.cell_size) + Universe.offset, virtual_window);
+                var offset = UVector2.mod3(Universe.camera.ScreenToWorld(new Vector2(n * Universe.cell_size)), virtual_window);
 
-                if (offset.X < Universe.client_size.X) {
+                if (offset.X < Universe.camera.size.X) {
                     var x_line = get_x_line(offset.X);
                     e.Graphics.DrawLine(grid_pen, x_line.p1, x_line.p2);
                 }
 
-                if (offset.Y < Universe.client_size.Y) {
+                if (offset.Y < Universe.camera.size.Y) {
                     var y_line = get_y_line(offset.Y);
                     e.Graphics.DrawLine(grid_pen, y_line.p1, y_line.p2);
                 }
@@ -269,8 +288,8 @@ namespace month_6_Project_and_Portfolio_I {
         // interaction
 
 
-        private static Vector2 FindClickedCell(Vector2 mouse) =>
-            UVector2.Floor((mouse - Universe.offset) / Universe.cell_size);
+        public static Vector2 FindClickedCell(Vector2 mouse) =>
+            UVector2.Floor((mouse - Universe.camera.world_position) / Universe.cell_size);
 
         private static void Toggle(Vector2 cell) {
             Universe.map[cell].Toggle();
@@ -305,27 +324,26 @@ namespace month_6_Project_and_Portfolio_I {
         }
 
         public static void Draw(PaintEventArgs e) {
+            RectangleF cell_rect(Vector2 cell) => new RectangleF(
+                // (cell * Universe.cell_size) + Universe.camera.world_position).ToPointF(),
+                Universe.camera.ScreenToWorld(cell * Universe.cell_size).ToPointF(),
+                new Vector2(Universe.cell_size).ToSizeF()
+            );
+
             // TODO: only paint and write cells that are visible
             Universe.alive.ForEach((cell) => {
-                Universe.map[cell].Paint(e, new RectangleF(
-                    (cell * Universe.cell_size + Universe.offset).ToPointF(),
-                    new Vector2(Universe.cell_size).ToSizeF()
-
-                ));
+                Universe.map[cell].Paint(e, cell_rect(cell));
             });
 
             Universe.map.ForEach((cell) => {
-                Universe.map[cell].Write(e, new RectangleF(
-                    (cell * Universe.cell_size + Universe.offset).ToPointF(),
-                    new Vector2(Universe.cell_size).ToSizeF()
-                ));
+                Universe.map[cell].Write(e, cell_rect(cell));
             });
 
             Universe.DrawGrid(e);
         }
 
         public static void ToggleAtMousePosition(Vector2 mouse_position) {
-            var cell = FindClickedCell(mouse_position);
+            var cell = Universe.FindClickedCell(mouse_position);
 
             if (Universe.map.ContainsKey(cell)) {
                 // toggle
