@@ -390,7 +390,9 @@ namespace month_6_Project_and_Portfolio_I
             this.graphicsPanelMain.TabIndex = 3;
             this.graphicsPanelMain.Paint += new System.Windows.Forms.PaintEventHandler(this.graphicsPanelMain_Paint);
             this.graphicsPanelMain.MouseClick += new System.Windows.Forms.MouseEventHandler(this.graphicsPanelMain_MouseClick);
-            this.graphicsPanelMain.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Window_MouseMove);
+            this.graphicsPanelMain.MouseEnter += new System.EventHandler(this.graphicsPanelMain_MouseEnter);
+            this.graphicsPanelMain.MouseLeave += new System.EventHandler(this.graphicsPanelMain_MouseLeave);
+            this.graphicsPanelMain.MouseMove += new System.Windows.Forms.MouseEventHandler(this.graphicsPanelMain_MouseMove);
             // 
             // Window
             // 
@@ -401,13 +403,12 @@ namespace month_6_Project_and_Portfolio_I
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.toolStrip);
             this.Controls.Add(this.menuStrip1);
+            this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Window";
             this.Text = "Form1";
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.keyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.keyUp);
-            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.graphicsPanelMain_MouseClick);
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Window_MouseMove);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.toolStrip.ResumeLayout(false);

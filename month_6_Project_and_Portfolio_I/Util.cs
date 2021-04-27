@@ -63,6 +63,10 @@ namespace month_6_Project_and_Portfolio_I {
         public static Vector2 ToVector2(this Size size) => new Vector2(size.Width, size.Height);
     }
 
+    public static class UMath {
+        public static float Clamp(float n, float min, float max) => n < min ? min : n > max ? max : n;
+    }
+
     public static class UMatrix {
         public delegate void ForEachXCallback(int x);
         public delegate void ForEachYCallback(int y);

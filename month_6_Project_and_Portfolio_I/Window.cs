@@ -16,7 +16,7 @@ namespace month_6_Project_and_Portfolio_I {
     public partial class Window : Form {
         // public
 
-        private float speed = 20;
+        private float speed = 2;
 
         // private
 
@@ -30,7 +30,10 @@ namespace month_6_Project_and_Portfolio_I {
         public Window() {
             this.InitializeComponent();
 
+            this.graphicsPanelMain.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.graphicsPanelMain_MouseWheel);
+
             Universe.Initialize(this.graphicsPanelMain);
+            Universe.camera.zoom_speed = (float)(1.0 / 240.0);
 
             // Setup the timer
             this.nextGenTimer.Interval = 200;
@@ -74,8 +77,7 @@ namespace month_6_Project_and_Portfolio_I {
             )) * this.speed;
 
             if (movement != Vector2.Zero) {
-                Universe.camera.position += movement;
-                //Universe.offset += movement;
+                Universe.camera.position += /*(10 / Universe.camera.zoom) * */ movement;
             }
 
             if (this.input.Values.Contains(true)) {
@@ -126,15 +128,12 @@ namespace month_6_Project_and_Portfolio_I {
 
             this.toolStripStatusMousePosition.Text = $"Mouse Position = ({this.mouse_position.X}, {this.mouse_position.Y})";
 
-            // draw mouse position
+            RectangleF cell_rect(Vector2 v) => new RectangleF(
+                Universe.camera.WorldToScreen(v * Universe.cell_size).ToPointF(),
+                new Vector2(Universe.cell_size).ToSizeF()
+            );
 
-            //e.Graphics.DrawString(
-            //    this.neighbors.ToString(),
-            //    Cell.font,
-            //    Cell.font_brush,
-            //    rectangle,
-            //    Cell.font_string_format
-            //);
+            e.Graphics.FillRectangle(Cell.cell_brush, cell_rect(this.mouse_position));
         }
 
         private void graphicsPanelMain_MouseClick(object sender, MouseEventArgs e) {
@@ -277,9 +276,35 @@ namespace month_6_Project_and_Portfolio_I {
             this.redraw();
         }
 
+        private Vector2 raw_mouse_position;
         private Vector2 mouse_position;
-        private void Window_MouseMove(object sender, MouseEventArgs e) {
-            this.mouse_position = Universe.FindClickedCell(new Vector2(e.X, e.Y));
+
+        private void graphicsPanelMain_MouseMove(object sender, MouseEventArgs e) {
+            this.raw_mouse_position = new Vector2(e.X, e.Y);
+            this.mouse_position = Universe.FindClickedCell(raw_mouse_position);
+            this.redraw();
+        }
+
+        private void graphicsPanelMain_MouseEnter(object sender, EventArgs e) {
+            this.graphicsPanelMain.Focus();
+        }
+
+        private void graphicsPanelMain_MouseLeave(object sender, EventArgs e) {
+            this.ActiveControl = null;
+        }
+
+        private void graphicsPanelMain_MouseWheel(object sender, MouseEventArgs e) {
+            bool no_scroll = e.Delta == 0;
+            if (no_scroll) { return; }
+
+            Universe.camera.ZoomBy(e.Delta);
+            Universe.camera.Clamp();
+
+            Universe.UpdateDefaultCellSize();
+
+            Console.WriteLine();
+            Universe.alive.ForEach(c => Console.WriteLine(c));
+
             this.redraw();
         }
     }

@@ -14,7 +14,7 @@ namespace month_6_Project_and_Portfolio_I {
         public static Camera camera;
 
         private static float _cell_size;
-        private static float cell_size {
+        public static float cell_size {
             get => Universe._cell_size;
             set {
                 Universe._cell_size = value;
@@ -23,12 +23,10 @@ namespace month_6_Project_and_Portfolio_I {
 
         }
 
-        //public static Vector2 offset;
-
         public static int generation = 0;
 
         // only alive cells
-        private static HashSet<Vector2> alive = new HashSet<Vector2>();
+        public static HashSet<Vector2> alive = new HashSet<Vector2>();
         // all cells that need to be kept track of, alive + alive neighbors
         private static Dictionary<Vector2, Cell> map = new Dictionary<Vector2, Cell>();
 
@@ -52,7 +50,7 @@ namespace month_6_Project_and_Portfolio_I {
                 Universe.graphics_panel.ClientSize.ToVector2()
             );
 
-            Universe.cell_size = Universe.DefaultCellSize();
+            Universe.UpdateDefaultCellSize();
 
             
 
@@ -71,6 +69,9 @@ namespace month_6_Project_and_Portfolio_I {
 
         private static float DefaultCellSize() =>
             Math.Min(Universe.camera.size.X, Universe.camera.size.Y) / Universe.camera.zoom;
+
+        public static float UpdateDefaultCellSize() =>
+            Universe.cell_size = Universe.DefaultCellSize();
 
 
 
@@ -248,16 +249,6 @@ namespace month_6_Project_and_Portfolio_I {
 
 
         private static void DrawGrid(PaintEventArgs e) {
-            (PointF p1, PointF p2) get_x_line(float offset_x) => (
-                new Vector2(offset_x, 0).ToPointF(),
-                new Vector2(offset_x, Universe.camera.size.Y).ToPointF()
-            );
-
-            (PointF p1, PointF p2) get_y_line(float offset_y) => (
-                new Vector2(0, offset_y).ToPointF(),
-                new Vector2(Universe.camera.size.X, offset_y).ToPointF()
-            );
-
             var grid_pen = new Pen(Universe.colors["grid"], 1);
 
             var virtual_window =
@@ -265,20 +256,32 @@ namespace month_6_Project_and_Portfolio_I {
                 UVector2.mod2(Universe.camera.size, Universe.cell_size);
 
             var total_lines = virtual_window / Universe.cell_size;
-            var biggest_axis = Math.Max(total_lines.X, total_lines.Y);
 
-            for (int n = 0; n < biggest_axis; n += 1) {
-                var offset = UVector2.mod3(Universe.camera.ScreenToWorld(new Vector2(n * Universe.cell_size)), virtual_window);
 
-                if (offset.X < Universe.camera.size.X) {
-                    var x_line = get_x_line(offset.X);
-                    e.Graphics.DrawLine(grid_pen, x_line.p1, x_line.p2);
-                }
 
-                if (offset.Y < Universe.camera.size.Y) {
-                    var y_line = get_y_line(offset.Y);
-                    e.Graphics.DrawLine(grid_pen, y_line.p1, y_line.p2);
-                }
+            Vector2 offset(int n) =>
+                UVector2.mod3(Universe.camera.WorldToScreen(new Vector2(n * Universe.cell_size)), virtual_window);
+
+            (PointF p1, PointF p2) get_x_line(int x) => (
+                new Vector2(offset(x).X, 0).ToPointF(),
+                new Vector2(offset(x).X, Universe.camera.size.Y).ToPointF()
+            );
+
+            (PointF p1, PointF p2) get_y_line(int y) => (
+                new Vector2(0, offset(y).Y).ToPointF(),
+                new Vector2(Universe.camera.size.X, offset(y).Y).ToPointF()
+            );
+
+
+
+            for (int x = 0; x < total_lines.X; x += 1) {
+                var x_line = get_x_line(x);
+                e.Graphics.DrawLine(grid_pen, x_line.p1, x_line.p2);
+            }
+
+            for (int y = 0; y < total_lines.Y; y += 1) {
+                var y_line = get_y_line(y);
+                e.Graphics.DrawLine(grid_pen, y_line.p1, y_line.p2);
             }
 
             grid_pen.Dispose();
@@ -289,7 +292,7 @@ namespace month_6_Project_and_Portfolio_I {
 
 
         public static Vector2 FindClickedCell(Vector2 mouse) =>
-            UVector2.Floor((mouse - Universe.camera.world_position) / Universe.cell_size);
+            UVector2.Floor(Universe.camera.ScreenToWorld(mouse) / Universe.cell_size);
 
         private static void Toggle(Vector2 cell) {
             Universe.map[cell].Toggle();
@@ -324,9 +327,8 @@ namespace month_6_Project_and_Portfolio_I {
         }
 
         public static void Draw(PaintEventArgs e) {
-            RectangleF cell_rect(Vector2 cell) => new RectangleF(
-                // (cell * Universe.cell_size) + Universe.camera.world_position).ToPointF(),
-                Universe.camera.ScreenToWorld(cell * Universe.cell_size).ToPointF(),
+            RectangleF cell_rect(Vector2 v) => new RectangleF(
+                Universe.camera.WorldToScreen(v * Universe.cell_size).ToPointF(),
                 new Vector2(Universe.cell_size).ToSizeF()
             );
 

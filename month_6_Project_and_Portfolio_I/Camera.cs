@@ -21,7 +21,10 @@ namespace month_6_Project_and_Portfolio_I {
         public GraphicsPanel graphics_panel;
 
         public Vector2 position;
+        public float zoom_speed = 1;
         public float zoom;
+        public float zoom_in_limit = 2;
+        public float zoom_out_limit = 40;
         public Vector2 world_position => this.ScreenToWorld(this.position);
 
         public SizeType size_type = SizeType.CLIENT;
@@ -43,7 +46,7 @@ namespace month_6_Project_and_Portfolio_I {
         public Vector2 anchor {
             get =>
                 this.anchor_type == AnchorType.TOP_LEFT ? this.position :
-                this.anchor_type == AnchorType.CENTER   ? (this.size - this.position) / 2 + this.position :
+                this.anchor_type == AnchorType.CENTER ? this.position + this.size / 2 :
                 this._anchor; // this.anchor_type == AnchorType.CUSTOM
 
             set {
@@ -53,12 +56,12 @@ namespace month_6_Project_and_Portfolio_I {
             }
         }
 
-        public Vector2 top_left     => this.position - this.anchor;
+        public Vector2 top_left => this.position - this.anchor;
         public Vector2 bottom_right => this.position + (this.size - this.anchor);
 
-        public float left   => this.top_left.X;
-        public float right  => this.bottom_right.X;
-        public float top    => this.top_left.Y;
+        public float left => this.top_left.X;
+        public float right => this.bottom_right.X;
+        public float top => this.top_left.Y;
         public float bottom => this.bottom_right.Y;
 
         public Camera(
@@ -73,13 +76,13 @@ namespace month_6_Project_and_Portfolio_I {
             this.zoom = 10;
 
             this.anchor_type = anchor_type;
-            
+
             if (size_type == SizeType.CUSTOM) {
                 this.size = size;
             }
 
             this.anchor_type = anchor_type;
-            
+
             if (anchor_type == AnchorType.CUSTOM) {
                 this.anchor = anchor;
             }
@@ -96,10 +99,16 @@ namespace month_6_Project_and_Portfolio_I {
             Vector2 position, Vector2 size
         ) : this(graphics_panel, position, size, Vector2.Zero) { }
 
+        public void ZoomBy(float amount) =>
+            this.zoom += this.zoom_speed * amount;
+
+        public void Clamp() =>
+            this.zoom = UMath.Clamp(this.zoom, this.zoom_in_limit, this.zoom_out_limit);
+
         public Vector2 ScreenToWorld(Vector2 vector2) =>
-            vector2 + this.position + this.anchor;
+            vector2 - Universe.camera.position - Universe.camera.anchor;
 
         public Vector2 WorldToScreen(Vector2 vector2) =>
-            vector2 - this.anchor - this.position;
+            Universe.camera.anchor + Universe.camera.position + vector2;
     }
 }

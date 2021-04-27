@@ -1,7 +1,5 @@
 # TODO
 
-- [x] center grid when resizing window
-- [x] randomize functions
 - [ ] add icons
 - [ ] changing colors and theming
 - [ ] going back in generations
