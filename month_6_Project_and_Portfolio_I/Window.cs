@@ -10,15 +10,20 @@ using System.Windows.Forms;
 using System.Numerics;
 using System.IO;
 using System.Text;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace month_6_Project_and_Portfolio_I {
     public partial class Window : Form {
         // public
 
-        private float speed = 2;
+        private float speed = 20;
 
         // private
+
+        private int random_seed;
+        private Vector2 raw_mouse_position;
+        private Vector2 mouse_position;
 
         // readonly
 
@@ -77,7 +82,7 @@ namespace month_6_Project_and_Portfolio_I {
             )) * this.speed;
 
             if (movement != Vector2.Zero) {
-                Universe.camera.position += /*(10 / Universe.camera.zoom) * */ movement;
+                Universe.camera.position += (10 / Universe.camera.zoom) * movement;
             }
 
             if (this.input.Values.Contains(true)) {
@@ -282,9 +287,6 @@ namespace month_6_Project_and_Portfolio_I {
             this.redraw();
         }
 
-        private Vector2 raw_mouse_position;
-        private Vector2 mouse_position;
-
         private void graphicsPanelMain_MouseMove(object sender, MouseEventArgs e) {
             this.raw_mouse_position = new Vector2(e.X, e.Y);
             this.mouse_position = Universe.FindClickedCell(raw_mouse_position);
@@ -308,10 +310,89 @@ namespace month_6_Project_and_Portfolio_I {
 
             Universe.UpdateDefaultCellSize();
 
-            Console.WriteLine();
-            Universe.alive.ForEach(c => Console.WriteLine(c));
-
             this.redraw();
+        }
+
+        private void toolStripButtonChangeRandomSeed_Click(object sender, EventArgs e) {
+            ChangeRandomSeedDialog change_random_seed_dialog = new ChangeRandomSeedDialog();
+
+            change_random_seed_dialog.seed = this.random_seed;
+
+            if (change_random_seed_dialog.ShowDialog() == DialogResult.OK) {
+                this.random_seed = change_random_seed_dialog.seed;
+            }
+        }
+
+        private string fetch(string value) {
+            const string download_path = "https://conwaylife.com/ref/lexicon/";
+
+            bool is_letter = new Regex(@"[a-z]").IsMatch(value[0].ToString());
+            bool is_number = new Regex(@"[0-9]").IsMatch(value[0].ToString());
+
+            char page_index_url =
+                is_number ? '1' :
+                is_letter ? value[0] :
+                '\0';
+
+            if (is_letter || is_number) {
+                string download_file = $"lex_{page_index_url}.htm";
+                string fetched_html = new WebClient().DownloadString(download_path + download_file);
+
+                Match lexicon_section = new Regex($@"<p><a name=\w+>:<\/a><b>{value}[\S\s]+?<\/pre>").Match(fetched_html);
+
+                if (lexicon_section.Success) {
+                    var lexicon = new Regex(@"(?<=<pre>[\n\r]+)[\t\n\r.O]+(?=<\/pre>)").Match(lexicon_section.Value);
+                    var lexicon_name = new Regex(@"(?<=<a name=)[\w\-]+(?=>:<\/a>)").Match(lexicon_section.Value);
+
+                    string remove_html(string s) => new Regex(@"<[\S\s]+?>").Replace(s, "");
+                    string replace_newline_w_space(string s) => new Regex(@"[\n\r]+").Replace(s, " ");
+
+                    Console.WriteLine(lexicon_section.Value);
+
+                    if (lexicon.Success) {
+                        Console.WriteLine();
+                        Console.WriteLine(replace_newline_w_space(remove_html(lexicon_section.Value)).Substring(1));
+
+                        return lexicon.Value;
+                    } else if (lexicon_name.Success) {
+                        Console.WriteLine($"Lexicon \"{value}\" was not found. Last reference found was \"{download_path + download_file}#{lexicon_name}\".");
+                        Console.WriteLine();
+                        Console.WriteLine(replace_newline_w_space(remove_html(lexicon_section.Value)).Substring(1));
+
+                        return "\0";
+                    } else {
+                        Console.WriteLine($"Lexicon value of \"{value}\" not found");
+                        return "\0";
+                    }
+                } else {
+                    Console.WriteLine($"Lexicon \"{value}\" not found");
+                    return "\0";
+                }
+            } else {
+                Console.WriteLine($"Fetched lexicon \"{value}\" is invalid.");
+                return "\0";
+            }
+        }
+
+        private void toolStripButtonFetch_Click(object sender, EventArgs e) {
+            FetchDialog fetch_dialog = new FetchDialog();
+
+            if (fetch_dialog.ShowDialog() == DialogResult.OK && fetch_dialog.value.Length > 0) {
+                string found_lexicon = this.fetch(fetch_dialog.value);
+
+                if (!string.IsNullOrWhiteSpace(found_lexicon)) {
+                    var state = Regex.Split(found_lexicon, @"([\n\r]+|\t)+").Where(row => !string.IsNullOrWhiteSpace(row));
+                    
+                    this.reset();
+
+                    Universe.Reset(this.toolStripStatusLabelGenerations);
+                    this.nextGenTimer.Stop();
+
+                    Universe.OpenStateAs(Universe.SAVE_FORMAT.CELLS, state.ToArray());
+
+                    this.redraw();
+                }
+            }
         }
     }
 }

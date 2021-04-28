@@ -11,7 +11,7 @@ namespace month_6_Project_and_Portfolio_I {
     static class Universe {
         private static GraphicsPanel graphics_panel;
 
-        public static Camera camera;
+        public static Camera camera = null;
 
         private static float _cell_size;
         public static float cell_size {
@@ -45,12 +45,26 @@ namespace month_6_Project_and_Portfolio_I {
         public static void Initialize(GraphicsPanel graphics_panel) {
             Universe.graphics_panel = graphics_panel;
 
-            Universe.camera = new Camera(graphics_panel,
-                new Vector2(0, 0),
-                Universe.graphics_panel.ClientSize.ToVector2()
-            );
+            //float tmp_zoom = Universe.camera?.zoom ?? 10;
 
-            Universe.UpdateDefaultCellSize();
+            if (Universe.camera == null) {
+                Universe.camera = new Camera(graphics_panel,
+                    Vector2.Zero,
+                    Universe.graphics_panel.ClientSize.ToVector2()
+                );
+
+                Universe.UpdateDefaultCellSize();
+            }
+
+            //Universe.camera = new Camera(graphics_panel,
+            //    Vector2.Zero,
+            //    Universe.camera?.size_type ?? Camera.SizeType.CLIENT, Universe.graphics_panel.ClientSize.ToVector2(),
+            //    Universe.camera?.anchor_type ?? Camera.AnchorType.CENTER, Universe.camera?.anchor ?? Vector2.Zero
+            //);
+
+            //Universe.camera.zoom = tmp_zoom;
+
+            //Universe.UpdateDefaultCellSize();
 
             
 
