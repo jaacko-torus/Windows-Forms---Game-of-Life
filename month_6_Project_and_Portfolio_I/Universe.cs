@@ -151,14 +151,14 @@ namespace month_6_Project_and_Portfolio_I {
             }
         }[format]();
 
-        public static void Random() {
+        public static void Random(int seed = 0) {
             int size = 10;
             float half_size = (float)size / 2;
 
             float distribution_from_float(float n, float scale) =>
                 (float)Math.Pow(Math.E, -Math.Pow((float)n / (float)scale, 2));
 
-            var rnd = new Random();
+            var rnd = new Random(seed);
 
             UMatrix.ForEach(new Vector2(size),
                 (x, y) => {
