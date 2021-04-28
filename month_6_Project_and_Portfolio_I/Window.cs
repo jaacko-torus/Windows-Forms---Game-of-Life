@@ -133,7 +133,9 @@ namespace month_6_Project_and_Portfolio_I {
                 new Vector2(Universe.cell_size).ToSizeF()
             );
 
-            e.Graphics.FillRectangle(Cell.cell_brush, cell_rect(this.mouse_position));
+            var hover_brush = new SolidBrush(Color.FromArgb(0x66, (Cell.cell_brush as SolidBrush).Color));
+
+            e.Graphics.FillRectangle(hover_brush, cell_rect(this.mouse_position));
         }
 
         private void graphicsPanelMain_MouseClick(object sender, MouseEventArgs e) {
@@ -182,7 +184,9 @@ namespace month_6_Project_and_Portfolio_I {
                 if (rle_format_matches) {
                     Universe.SaveStateAs(Universe.SAVE_FORMAT.RLE).ToList()
                         .ForEach(writer.WriteLine);
-                } else /* if (cells_format_matches) */ {
+
+                    Console.WriteLine("Feature currently not implemented.");
+                } else if (cells_format_matches) {
                     // NOTE: cells is the default format
 
                     // add comments if necesary
@@ -190,6 +194,8 @@ namespace month_6_Project_and_Portfolio_I {
 
                     Universe.SaveStateAs(Universe.SAVE_FORMAT.CELLS).ToList()
                         .ForEach(writer.WriteLine);
+                } else {
+                    Console.WriteLine("This should never happen.");
                 }
                 
                 writer.Close();
@@ -235,7 +241,7 @@ namespace month_6_Project_and_Portfolio_I {
                         }
 
                         if (rle_format_matches) {
-
+                            Console.WriteLine("Feature currently not implemented.");
                         }
 
                         if (state_has_no_formatting_errors) {
@@ -271,7 +277,7 @@ namespace month_6_Project_and_Portfolio_I {
         private void toolStripButtonRandom_Click(object sender, EventArgs e) {
             this.reset();
             Universe.Reset(this.toolStripStatusLabelGenerations);
-            Universe.Random();
+            Universe.Random(0);
             this.nextGenTimer.Stop();
             this.redraw();
         }
