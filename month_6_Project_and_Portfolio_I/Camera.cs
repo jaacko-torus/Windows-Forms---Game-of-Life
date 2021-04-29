@@ -24,7 +24,7 @@ namespace month_6_Project_and_Portfolio_I {
         public float zoom_speed = 1;
         public float zoom;
         public float zoom_in_limit = 2;
-        public float zoom_out_limit = 40;
+        public float zoom_out_limit = 200;
         public Vector2 world_position => this.ScreenToWorld(this.position);
 
         public SizeType size_type = SizeType.CLIENT;

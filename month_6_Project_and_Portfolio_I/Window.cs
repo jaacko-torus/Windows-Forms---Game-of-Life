@@ -17,7 +17,9 @@ namespace month_6_Project_and_Portfolio_I {
     public partial class Window : Form {
         // public
 
-        private float speed = 20;
+        public float camera_speed = 20;
+        public float next_gen_speed = 200;
+        public float refresh_speed = 1000 / 30;
 
         // private
 
@@ -41,7 +43,7 @@ namespace month_6_Project_and_Portfolio_I {
             Universe.camera.zoom_speed = (float)(1.0 / 240.0);
 
             // Setup the timer
-            this.nextGenTimer.Interval = 200;
+            this.nextGenTimer.Interval = (int)this.next_gen_speed;
             this.nextGenTimer.Tick += (object s, EventArgs e) => {
                 // update universe
                 Universe.Next(this.toolStripStatusLabelGenerations);
@@ -49,7 +51,7 @@ namespace month_6_Project_and_Portfolio_I {
                 this.redraw();
             };
 
-            this.inputTimer.Interval = 1000 / 30;
+            this.inputTimer.Interval = (int)this.refresh_speed;
             this.inputTimer.Tick += this.handleInput;
             this.inputTimer.Start();
         }
@@ -79,7 +81,7 @@ namespace month_6_Project_and_Portfolio_I {
             var movement = UVector2.Normalized(new Vector2(
                 to_i(this.input["left"]) - to_i(this.input["right"]),
                 to_i(this.input["up"])   - to_i(this.input["down"])
-            )) * this.speed;
+            )) * this.camera_speed;
 
             if (movement != Vector2.Zero) {
                 Universe.camera.position += (10 / Universe.camera.zoom) * movement;
@@ -392,6 +394,21 @@ namespace month_6_Project_and_Portfolio_I {
 
                     this.redraw();
                 }
+            }
+        }
+
+        private void toolStripButtonChangePlaySpeed_Click(object sender, EventArgs e) {
+            ChangePlaySpeedDialog change_play_speed_dialog = new ChangePlaySpeedDialog();
+
+            change_play_speed_dialog.play_speed = this.next_gen_speed;
+
+            if (change_play_speed_dialog.ShowDialog() == DialogResult.OK) {
+                this.next_gen_speed = change_play_speed_dialog.play_speed;
+                this.nextGenTimer.Interval = (int)this.next_gen_speed;
+
+                //bool was_running = this.nextGenTimer.Enabled;
+                //this.nextGenTimer.Stop();
+                //if (was_running) { this.nextGenTimer.Start(); }
             }
         }
     }

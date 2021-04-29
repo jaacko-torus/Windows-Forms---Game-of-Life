@@ -64,14 +64,15 @@ namespace month_6_Project_and_Portfolio_I
             this.toolStripButtonReset = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonRandom = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripButtonChangePlaySpeed = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonChangeRandomSeed = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripButtonFetch = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelGenerations = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripStatusMousePosition = new System.Windows.Forms.ToolStripStatusLabel();
             this.graphicsPanelMain = new month_6_Project_and_Portfolio_I.GraphicsPanel();
-            this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripButtonFetch = new System.Windows.Forms.ToolStripButton();
             this.menuStrip1.SuspendLayout();
             this.toolStrip.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -241,6 +242,7 @@ namespace month_6_Project_and_Portfolio_I
             this.toolStripButtonReset,
             this.toolStripButtonRandom,
             this.toolStripSeparator4,
+            this.toolStripButtonChangePlaySpeed,
             this.toolStripButtonChangeRandomSeed,
             this.toolStripSeparator8,
             this.toolStripButtonFetch});
@@ -371,6 +373,17 @@ namespace month_6_Project_and_Portfolio_I
             this.toolStripSeparator4.Name = "toolStripSeparator4";
             this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
             // 
+            // toolStripButtonChangePlaySpeed
+            // 
+            this.toolStripButtonChangePlaySpeed.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButtonChangePlaySpeed.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonChangePlaySpeed.Image")));
+            this.toolStripButtonChangePlaySpeed.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonChangePlaySpeed.Name = "toolStripButtonChangePlaySpeed";
+            this.toolStripButtonChangePlaySpeed.Size = new System.Drawing.Size(112, 22);
+            this.toolStripButtonChangePlaySpeed.Text = "Change Play Speed";
+            this.toolStripButtonChangePlaySpeed.ToolTipText = "Change Play Speed";
+            this.toolStripButtonChangePlaySpeed.Click += new System.EventHandler(this.toolStripButtonChangePlaySpeed_Click);
+            // 
             // toolStripButtonChangeRandomSeed
             // 
             this.toolStripButtonChangeRandomSeed.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
@@ -380,6 +393,21 @@ namespace month_6_Project_and_Portfolio_I
             this.toolStripButtonChangeRandomSeed.Size = new System.Drawing.Size(128, 22);
             this.toolStripButtonChangeRandomSeed.Text = "Change Random Seed";
             this.toolStripButtonChangeRandomSeed.Click += new System.EventHandler(this.toolStripButtonChangeRandomSeed_Click);
+            // 
+            // toolStripSeparator8
+            // 
+            this.toolStripSeparator8.Name = "toolStripSeparator8";
+            this.toolStripSeparator8.Size = new System.Drawing.Size(6, 25);
+            // 
+            // toolStripButtonFetch
+            // 
+            this.toolStripButtonFetch.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButtonFetch.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonFetch.Image")));
+            this.toolStripButtonFetch.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonFetch.Name = "toolStripButtonFetch";
+            this.toolStripButtonFetch.Size = new System.Drawing.Size(40, 22);
+            this.toolStripButtonFetch.Text = "Fetch";
+            this.toolStripButtonFetch.Click += new System.EventHandler(this.toolStripButtonFetch_Click);
             // 
             // statusStrip1
             // 
@@ -423,21 +451,6 @@ namespace month_6_Project_and_Portfolio_I
             this.graphicsPanelMain.MouseEnter += new System.EventHandler(this.graphicsPanelMain_MouseEnter);
             this.graphicsPanelMain.MouseLeave += new System.EventHandler(this.graphicsPanelMain_MouseLeave);
             this.graphicsPanelMain.MouseMove += new System.Windows.Forms.MouseEventHandler(this.graphicsPanelMain_MouseMove);
-            // 
-            // toolStripSeparator8
-            // 
-            this.toolStripSeparator8.Name = "toolStripSeparator8";
-            this.toolStripSeparator8.Size = new System.Drawing.Size(6, 25);
-            // 
-            // toolStripButtonFetch
-            // 
-            this.toolStripButtonFetch.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButtonFetch.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonFetch.Image")));
-            this.toolStripButtonFetch.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButtonFetch.Name = "toolStripButtonFetch";
-            this.toolStripButtonFetch.Size = new System.Drawing.Size(40, 22);
-            this.toolStripButtonFetch.Text = "Fetch";
-            this.toolStripButtonFetch.Click += new System.EventHandler(this.toolStripButtonFetch_Click);
             // 
             // Window
             // 
@@ -509,6 +522,7 @@ namespace month_6_Project_and_Portfolio_I
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
         private System.Windows.Forms.ToolStripButton toolStripButtonFetch;
+        private System.Windows.Forms.ToolStripButton toolStripButtonChangePlaySpeed;
     }
 }
 
