@@ -25,6 +25,8 @@ namespace month_6_Project_and_Portfolio_I {
         public float zoom;
         public float zoom_in_limit = 2;
         public float zoom_out_limit = 200;
+        public float zoom_remove_cell_neighbors = 22;
+        public float zoom_remove_universe_grid = 45;
         public Vector2 world_position => this.ScreenToWorld(this.position);
 
         public SizeType size_type = SizeType.CLIENT;
@@ -99,8 +101,9 @@ namespace month_6_Project_and_Portfolio_I {
             Vector2 position, Vector2 size
         ) : this(graphics_panel, position, size, Vector2.Zero) { }
 
-        public void ZoomBy(float amount) =>
+        public void ZoomBy(float amount) {
             this.zoom += this.zoom_speed * amount;
+        }
 
         public void Clamp() =>
             this.zoom = UMath.Clamp(this.zoom, this.zoom_in_limit, this.zoom_out_limit);

@@ -263,42 +263,44 @@ namespace month_6_Project_and_Portfolio_I {
 
 
         private static void DrawGrid(PaintEventArgs e) {
-            var grid_pen = new Pen(Universe.colors["grid"], 1);
+            if (Universe.camera.zoom < Universe.camera.zoom_remove_universe_grid) {
+                var grid_pen = new Pen(Universe.colors["grid"], 1);
 
-            var virtual_window =
-                Universe.camera.size + new Vector2(Universe.cell_size) -
-                UVector2.mod2(Universe.camera.size, Universe.cell_size);
+                var virtual_window =
+                    Universe.camera.size + new Vector2(Universe.cell_size) -
+                    UVector2.mod2(Universe.camera.size, Universe.cell_size);
 
-            var total_lines = virtual_window / Universe.cell_size;
-
-
-
-            Vector2 offset(int n) =>
-                UVector2.mod3(Universe.camera.WorldToScreen(new Vector2(n * Universe.cell_size)), virtual_window);
-
-            (PointF p1, PointF p2) get_x_line(int x) => (
-                new Vector2(offset(x).X, 0).ToPointF(),
-                new Vector2(offset(x).X, Universe.camera.size.Y).ToPointF()
-            );
-
-            (PointF p1, PointF p2) get_y_line(int y) => (
-                new Vector2(0, offset(y).Y).ToPointF(),
-                new Vector2(Universe.camera.size.X, offset(y).Y).ToPointF()
-            );
+                var total_lines = virtual_window / Universe.cell_size;
 
 
 
-            for (int x = 0; x < total_lines.X; x += 1) {
-                var x_line = get_x_line(x);
-                e.Graphics.DrawLine(grid_pen, x_line.p1, x_line.p2);
+                Vector2 offset(int n) =>
+                    UVector2.mod3(Universe.camera.WorldToScreen(new Vector2(n * Universe.cell_size)), virtual_window);
+
+                (PointF p1, PointF p2) get_x_line(int x) => (
+                    new Vector2(offset(x).X, 0).ToPointF(),
+                    new Vector2(offset(x).X, Universe.camera.size.Y).ToPointF()
+                );
+
+                (PointF p1, PointF p2) get_y_line(int y) => (
+                    new Vector2(0, offset(y).Y).ToPointF(),
+                    new Vector2(Universe.camera.size.X, offset(y).Y).ToPointF()
+                );
+
+
+
+                for (int x = 0; x < total_lines.X; x += 1) {
+                    var x_line = get_x_line(x);
+                    e.Graphics.DrawLine(grid_pen, x_line.p1, x_line.p2);
+                }
+
+                for (int y = 0; y < total_lines.Y; y += 1) {
+                    var y_line = get_y_line(y);
+                    e.Graphics.DrawLine(grid_pen, y_line.p1, y_line.p2);
+                }
+
+                grid_pen.Dispose();
             }
-
-            for (int y = 0; y < total_lines.Y; y += 1) {
-                var y_line = get_y_line(y);
-                e.Graphics.DrawLine(grid_pen, y_line.p1, y_line.p2);
-            }
-
-            grid_pen.Dispose();
         }
 
 

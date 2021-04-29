@@ -41,6 +41,7 @@ namespace month_6_Project_and_Portfolio_I {
 
             Universe.Initialize(this.graphicsPanelMain);
             Universe.camera.zoom_speed = (float)(1.0 / 240.0);
+            this.toolStripStatusLabelZoom.Text = $"Zoom = {Universe.camera.zoom}";
 
             // Setup the timer
             this.nextGenTimer.Interval = (int)this.next_gen_speed;
@@ -133,7 +134,7 @@ namespace month_6_Project_and_Portfolio_I {
         private void graphicsPanelMain_Paint(object sender, PaintEventArgs e) {
             Universe.Draw(e);
 
-            this.toolStripStatusMousePosition.Text = $"Mouse Position = ({this.mouse_position.X}, {this.mouse_position.Y})";
+            this.toolStripStatusLabelMousePosition.Text = $"Mouse Position = ({this.mouse_position.X}, {this.mouse_position.Y})";
 
             RectangleF cell_rect(Vector2 v) => new RectangleF(
                 Universe.camera.WorldToScreen(v * Universe.cell_size).ToPointF(),
@@ -143,6 +144,21 @@ namespace month_6_Project_and_Portfolio_I {
             var hover_brush = new SolidBrush(Color.FromArgb(0x66, (Cell.cell_brush as SolidBrush).Color));
 
             e.Graphics.FillRectangle(hover_brush, cell_rect(this.mouse_position));
+        }
+
+        private bool is_paused = false;
+        private void graphicsPanelMain_MouseDown(object sender, MouseEventArgs e) {
+            if (this.nextGenTimer.Enabled) {
+                this.is_paused = true;
+                this.nextGenTimer.Stop();
+            }
+        }
+
+        private void graphicsPanelMain_MouseUp(object sender, MouseEventArgs e) {
+            if (this.is_paused) {
+                this.is_paused = false;
+                this.nextGenTimer.Start();
+            }
         }
 
         private void graphicsPanelMain_MouseClick(object sender, MouseEventArgs e) {
@@ -310,8 +326,14 @@ namespace month_6_Project_and_Portfolio_I {
             Universe.camera.ZoomBy(e.Delta);
             Universe.camera.Clamp();
 
+
+            //Universe.camera.position += -Universe.camera.position * e.Delta;
+
+
             Universe.UpdateDefaultCellSize();
 
+
+            this.toolStripStatusLabelZoom.Text = $"Zoom = {Universe.camera.zoom}";
             this.redraw();
         }
 
@@ -345,21 +367,21 @@ namespace month_6_Project_and_Portfolio_I {
                 if (lexicon_section.Success) {
                     var lexicon = new Regex(@"(?<=<pre>[\n\r]+)[\t\n\r.O]+(?=<\/pre>)").Match(lexicon_section.Value);
                     var lexicon_name = new Regex(@"(?<=<a name=)[\w\-]+(?=>:<\/a>)").Match(lexicon_section.Value);
+                    var lexicon_section_minus_lexicon = new Regex(@"[\S\s]+(?=<pre>)").Match(lexicon_section.Value);
 
                     string remove_html(string s) => new Regex(@"<[\S\s]+?>").Replace(s, "");
                     string replace_newline_w_space(string s) => new Regex(@"[\n\r]+").Replace(s, " ");
-
-                    Console.WriteLine(lexicon_section.Value);
+                    string clean(string s) => replace_newline_w_space(remove_html(s));
 
                     if (lexicon.Success) {
                         Console.WriteLine();
-                        Console.WriteLine(replace_newline_w_space(remove_html(lexicon_section.Value)).Substring(1));
+                        Console.WriteLine(clean(lexicon_section_minus_lexicon.Value));
 
                         return lexicon.Value;
                     } else if (lexicon_name.Success) {
                         Console.WriteLine($"Lexicon \"{value}\" was not found. Last reference found was \"{download_path + download_file}#{lexicon_name}\".");
                         Console.WriteLine();
-                        Console.WriteLine(replace_newline_w_space(remove_html(lexicon_section.Value)).Substring(1));
+                        Console.WriteLine(clean(lexicon_section.Value));
 
                         return "\0";
                     } else {
@@ -381,6 +403,7 @@ namespace month_6_Project_and_Portfolio_I {
 
             if (fetch_dialog.ShowDialog() == DialogResult.OK && fetch_dialog.value.Length > 0) {
                 string found_lexicon = this.fetch(fetch_dialog.value);
+                Console.WriteLine();
 
                 if (!string.IsNullOrWhiteSpace(found_lexicon)) {
                     var state = Regex.Split(found_lexicon, @"([\n\r]+|\t)+").Where(row => !string.IsNullOrWhiteSpace(row));
@@ -405,10 +428,6 @@ namespace month_6_Project_and_Portfolio_I {
             if (change_play_speed_dialog.ShowDialog() == DialogResult.OK) {
                 this.next_gen_speed = change_play_speed_dialog.play_speed;
                 this.nextGenTimer.Interval = (int)this.next_gen_speed;
-
-                //bool was_running = this.nextGenTimer.Enabled;
-                //this.nextGenTimer.Stop();
-                //if (was_running) { this.nextGenTimer.Start(); }
             }
         }
     }

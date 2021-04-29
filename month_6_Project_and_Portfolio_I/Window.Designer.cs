@@ -68,14 +68,16 @@ namespace month_6_Project_and_Portfolio_I
             this.toolStripButtonChangeRandomSeed = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButtonFetch = new System.Windows.Forms.ToolStripButton();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelGenerations = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripStatusMousePosition = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabelZoom = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabelMousePosition = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
             this.graphicsPanelMain = new month_6_Project_and_Portfolio_I.GraphicsPanel();
             this.menuStrip1.SuspendLayout();
             this.toolStrip.SuspendLayout();
-            this.statusStrip1.SuspendLayout();
+            this.statusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -409,17 +411,19 @@ namespace month_6_Project_and_Portfolio_I
             this.toolStripButtonFetch.Text = "Fetch";
             this.toolStripButtonFetch.Click += new System.EventHandler(this.toolStripButtonFetch_Click);
             // 
-            // statusStrip1
+            // statusStrip
             // 
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabelGenerations,
+            this.toolStripSeparator9,
+            this.toolStripStatusLabelMousePosition,
             this.toolStripSeparator7,
-            this.toolStripStatusMousePosition});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 676);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1184, 23);
-            this.statusStrip1.TabIndex = 2;
-            this.statusStrip1.Text = "statusStrip1";
+            this.toolStripStatusLabelZoom});
+            this.statusStrip.Location = new System.Drawing.Point(0, 676);
+            this.statusStrip.Name = "statusStrip";
+            this.statusStrip.Size = new System.Drawing.Size(1184, 23);
+            this.statusStrip.TabIndex = 2;
+            this.statusStrip.Text = "statusStrip";
             // 
             // toolStripStatusLabelGenerations
             // 
@@ -432,11 +436,22 @@ namespace month_6_Project_and_Portfolio_I
             this.toolStripSeparator7.Name = "toolStripSeparator7";
             this.toolStripSeparator7.Size = new System.Drawing.Size(6, 23);
             // 
-            // toolStripStatusMousePosition
+            // toolStripStatusLabelZoom
             // 
-            this.toolStripStatusMousePosition.Name = "toolStripStatusMousePosition";
-            this.toolStripStatusMousePosition.Size = new System.Drawing.Size(129, 18);
-            this.toolStripStatusMousePosition.Text = "Mouse Position = (0, 0)";
+            this.toolStripStatusLabelZoom.Name = "toolStripStatusLabelZoom";
+            this.toolStripStatusLabelZoom.Size = new System.Drawing.Size(59, 18);
+            this.toolStripStatusLabelZoom.Text = "Zoom = 0";
+            // 
+            // toolStripStatusLabelMousePosition
+            // 
+            this.toolStripStatusLabelMousePosition.Name = "toolStripStatusLabelMousePosition";
+            this.toolStripStatusLabelMousePosition.Size = new System.Drawing.Size(129, 18);
+            this.toolStripStatusLabelMousePosition.Text = "Mouse Position = (0, 0)";
+            // 
+            // toolStripSeparator9
+            // 
+            this.toolStripSeparator9.Name = "toolStripSeparator9";
+            this.toolStripSeparator9.Size = new System.Drawing.Size(6, 23);
             // 
             // graphicsPanelMain
             // 
@@ -448,9 +463,11 @@ namespace month_6_Project_and_Portfolio_I
             this.graphicsPanelMain.TabIndex = 3;
             this.graphicsPanelMain.Paint += new System.Windows.Forms.PaintEventHandler(this.graphicsPanelMain_Paint);
             this.graphicsPanelMain.MouseClick += new System.Windows.Forms.MouseEventHandler(this.graphicsPanelMain_MouseClick);
+            this.graphicsPanelMain.MouseDown += new System.Windows.Forms.MouseEventHandler(this.graphicsPanelMain_MouseDown);
             this.graphicsPanelMain.MouseEnter += new System.EventHandler(this.graphicsPanelMain_MouseEnter);
             this.graphicsPanelMain.MouseLeave += new System.EventHandler(this.graphicsPanelMain_MouseLeave);
             this.graphicsPanelMain.MouseMove += new System.Windows.Forms.MouseEventHandler(this.graphicsPanelMain_MouseMove);
+            this.graphicsPanelMain.MouseUp += new System.Windows.Forms.MouseEventHandler(this.graphicsPanelMain_MouseUp);
             // 
             // Window
             // 
@@ -458,7 +475,7 @@ namespace month_6_Project_and_Portfolio_I
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1184, 699);
             this.Controls.Add(this.graphicsPanelMain);
-            this.Controls.Add(this.statusStrip1);
+            this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.toolStrip);
             this.Controls.Add(this.menuStrip1);
             this.KeyPreview = true;
@@ -471,8 +488,8 @@ namespace month_6_Project_and_Portfolio_I
             this.menuStrip1.PerformLayout();
             this.toolStrip.ResumeLayout(false);
             this.toolStrip.PerformLayout();
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
+            this.statusStrip.ResumeLayout(false);
+            this.statusStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -482,7 +499,7 @@ namespace month_6_Project_and_Portfolio_I
 
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStrip toolStrip;
-        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.StatusStrip statusStrip;
         private GraphicsPanel graphicsPanelMain;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
@@ -515,7 +532,7 @@ namespace month_6_Project_and_Portfolio_I
         private System.Windows.Forms.ToolStripButton toolStripButtonStop;
         private System.Windows.Forms.ToolStripButton toolStripButtonReset;
         private System.Windows.Forms.ToolStripButton toolStripButtonRandom;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusMousePosition;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelZoom;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripButton toolStripButtonChangeRandomSeed;
@@ -523,6 +540,8 @@ namespace month_6_Project_and_Portfolio_I
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
         private System.Windows.Forms.ToolStripButton toolStripButtonFetch;
         private System.Windows.Forms.ToolStripButton toolStripButtonChangePlaySpeed;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator9;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelMousePosition;
     }
 }
 

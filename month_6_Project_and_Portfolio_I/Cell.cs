@@ -44,13 +44,15 @@ namespace month_6_Project_and_Portfolio_I {
         }
 
         public void Write(PaintEventArgs e, RectangleF rectangle) {
-            e.Graphics.DrawString(
-                this.neighbors.ToString(),
-                Cell.font,
-                Cell.font_brush,
-                rectangle,
-                Cell.font_string_format
-            );
+            if (Universe.camera.zoom < Universe.camera.zoom_remove_cell_neighbors) {
+                e.Graphics.DrawString(
+                    this.neighbors.ToString(),
+                    Cell.font,
+                    Cell.font_brush,
+                    rectangle,
+                    Cell.font_string_format
+                );
+            }
         }
     }
 }
